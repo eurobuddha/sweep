@@ -459,11 +459,38 @@ function setSweepProg(done, total, label) {
     document.getElementById("sweepLabel").textContent = label;
 }
 
+/* Hard gate before any sweep: the destination must be a well-formed Mx address whose
+   checksum matches its 0x form, and must EXIST in the derived block-as-keyuses set.
+   Returns null when valid, otherwise the reason the sweep is refused. */
+function validateDestination(d) {
+    if (!d || typeof d.miniaddress !== "string" || !SweepPlan.MX_RE.test(d.miniaddress))
+        return "destination is not a well-formed Mx address";
+    try {
+        var deps = { fromHex: KeyUsesDerive._fromHex, encode32: KeyUsesDerive._encode32, sha3: sha3_256 };
+        if (SweepPlan.mxFromHex(d.address, deps) !== d.miniaddress)
+            return "Mx checksum does not match the destination address " + d.miniaddress;
+    } catch (e) {
+        return "Mx checksum could not be verified: " + String(e && e.message || e);
+    }
+    var exists = derived.block.some(function (b) {
+        return b.index === d.index && b.address === d.address && b.miniaddress === d.miniaddress;
+    });
+    if (!exists) return "destination " + d.miniaddress + " is not one of this seed's derived block-as-keyuses keys";
+    return null;
+}
+
 function executeSweep() {
     if (sweeping || !verified || !destKey || !currentPlan || !currentPlan.jobs.length) return;
+    document.getElementById("log").textContent = "";
+    var destErr = validateDestination(destKey);
+    if (destErr) {
+        log("SWEEP REFUSED — " + destErr);
+        log("Nothing was sent. Re-run the derivation and pick the destination again.");
+        return;
+    }
     sweeping = true;
     armChanged();
-    document.getElementById("log").textContent = "";
+    log("Destination Mx checksum verified and key exists in the derived set ✓");
     log("Sweeping to block-as-keyuses key #" + (destKey.index + 1));
     log("  " + destKey.miniaddress);
     log("  " + destKey.address);
@@ -513,7 +540,9 @@ function runJob(job, cb) {
         }
     }
     var sum = SweepPlan.jobSum(job);
-    steps.push("txnoutput id:" + id + " address:" + destKey.address + " amount:" + sum
+    // Mx form on purpose: the node decodes it via Address.convertMinimaAddress, which
+    // re-verifies the 4-byte SHA3 checksum and refuses the output on any corruption.
+    steps.push("txnoutput id:" + id + " address:" + destKey.miniaddress + " amount:" + sum
         + (job.tokenid !== "0x00" ? " tokenid:" + job.tokenid : ""));
     steps.push("txnsign id:" + id + " publickey:auto txnpostauto:true txndelete:true");
 

@@ -168,6 +168,20 @@
     return m.indexOf("size too large") >= 0 || m.indexOf("too big") >= 0;
   }
 
+  /* Valid Mx charset: base32 digits 0-9a-v remapped i->w l->y o->z, uppercased —
+     so I, L, O (and X) can never appear. Anything else is corrupt. */
+  var MX_RE = /^Mx[0-9A-HJKMNP-VWYZ]+$/;
+
+  /** Checksummed Mx form of a 0x address — byte-exact core Address.makeMinimaAddress:
+      encode32( 0x01 || len:short || addr || SHA3-256(addr)[0..4] ).
+      deps: { fromHex, encode32, sha3 } — on the page KeyUsesDerive._fromHex /
+      KeyUsesDerive._encode32 and the sha3_256 global. */
+  function mxFromHex(hex, deps) {
+    var addr = deps.fromHex(hex);
+    var checksum = deps.sha3.array(addr).slice(0, 4);
+    return deps.encode32([0x01, (addr.length >> 8) & 0xFF, addr.length & 0xFF].concat(addr, checksum));
+  }
+
   root.SweepPlan = {
     MAX_INPUTS_PER_TXN: MAX_INPUTS_PER_TXN,
     MAX_KEYS_PER_TXN: MAX_KEYS_PER_TXN,
@@ -178,7 +192,9 @@
     plan: plan,
     jobSum: jobSum,
     split: split,
-    isSizeRefusal: isSizeRefusal
+    isSizeRefusal: isSizeRefusal,
+    MX_RE: MX_RE,
+    mxFromHex: mxFromHex
   };
   if (typeof module !== "undefined" && module.exports) module.exports = root.SweepPlan;
 
