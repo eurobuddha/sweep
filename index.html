@@ -114,7 +114,7 @@
 
     <!-- 2 · Verification -->
     <div class="card hidden" id="verifyCard">
-        <span class="section-label">2 · Derivation proof — classic 64 keys vs this node's wallet</span>
+        <span class="section-label">2 · Derivation proof</span>
         <div id="verifyVerdict"></div>
         <details><summary>Show all 64 derived classic addresses</summary>
             <div class="addrlist" id="classicList"></div>
@@ -123,7 +123,7 @@
 
     <!-- 3 · Destination -->
     <div class="card hidden" id="destCard">
-        <span class="section-label">3 · Destination — the same seed's 32 block-as-keyuses keys</span>
+        <span class="section-label">3 · Destination key</span>
         <div class="note" style="margin:0 0 12px">These addresses belong to <strong>your seed</strong> on a node started
         with <code class="inl">-blockaskeyuses</code> (minimaCore&nbsp;1.1.2.31+). Pick one — key&nbsp;#1 unless you
         have a reason. After the sweep, this classic node will show the funds as <strong>gone</strong>; they appear
@@ -135,7 +135,7 @@
     <div class="card hidden" id="sweepCard">
         <span class="section-label">4 · Sweep everything</span>
         <div id="planBox"></div>
-        <div class="destbox"><label>Sweeping to (block-as-keyuses key <span id="destIdx"></span>)</label>
+        <div class="destbox"><label>Sweeping to key <span id="destIdx"></span></label>
             <code id="destMx"></code><code id="destHex" style="color:var(--text-dim);margin-top:4px"></code></div>
         <label class="chk" style="margin-top:14px"><input type="checkbox" id="armChk" onchange="armChanged()">
             I understand this is <strong>&nbsp;irreversible&nbsp;</strong> and the funds will only be visible on a
