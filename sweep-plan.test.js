@@ -62,12 +62,13 @@ p = P.plan(many, OWN);
 assert.deepStrictEqual(p.jobs.map(function (j) { return j.coins.length; }), [10, 10, 5]);
 assert.strictEqual(p.signatures, 3);                 // one address, one sig per chunk
 
-// chunking: 6 coins at 6 addresses -> key cap of 4 forces a second chunk
+// chunking: 6 coins at 6 addresses -> each new key costs ~9K of signature budget, so the
+// 48K byte budget flushes at 3 keys, before the 4-key cap (same arithmetic as the APK)
 var spread = ["0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee", "0xfff"].map(function (a, i) {
   return coin("0xD" + i, a, "1");
 });
 p = P.plan(spread, OWN);
-assert.deepStrictEqual(p.jobs.map(function (j) { return j.coins.length; }), [4, 2]);
+assert.deepStrictEqual(p.jobs.map(function (j) { return j.coins.length; }), [3, 3]);
 assert.strictEqual(p.signatures, 6);
 
 // split halves a pooled job without losing coins
@@ -89,5 +90,53 @@ assert.ok(P.MX_RE.test(mx));
 assert.ok(!P.MX_RE.test("0xC2585B2A"));                        // hex is not an Mx address
 assert.ok(!P.MX_RE.test("MxG086ILO"));                         // I, L, O never appear in base32-remap
 assert.ok(P.mxFromHex("0xC2585B2A52C6FF475D28C901D31E482FE0071872E5C2229A8E6E23422D471FC3", mxDeps) !== mx); // 1-byte change breaks the checksum match
+
+// validateDestination: Mx-only + checksum + EXISTS in the derived block set — or refused
+var goodDest = { index: 3, address: "0xC2585B2A52C6FF475D28C901D31E482FE0071872E5C2229A8E6E23422D471FC2",
+                 miniaddress: "MxG0862B1DWKKM6VT3YQA69079HSW1FS03HGSN5Z8H9Y3JE4D12QHZVZ82GNCRG" };
+var blockSet = [ { index: 0, address: "0xAA", miniaddress: "MxAA" }, goodDest ];
+assert.strictEqual(P.validateDestination(goodDest, blockSet, mxDeps), null);
+assert.ok(/not a well-formed Mx/.test(P.validateDestination(
+  { index: 3, address: goodDest.address, miniaddress: goodDest.address }, blockSet, mxDeps)));  // 0x form refused
+assert.ok(/checksum does not match/.test(P.validateDestination(
+  { index: 3, address: "0xC2585B2A52C6FF475D28C901D31E482FE0071872E5C2229A8E6E23422D471FC3",
+    miniaddress: goodDest.miniaddress }, blockSet, mxDeps)));                                   // wrong hex refused
+assert.ok(/not one of this seed/.test(P.validateDestination(
+  { index: 9, address: goodDest.address, miniaddress: goodDest.miniaddress }, blockSet, mxDeps))); // wrong index = not in set
+assert.ok(/not one of this seed/.test(P.validateDestination(goodDest, [], mxDeps)));            // empty set refused
+assert.ok(P.validateDestination(null, blockSet, mxDeps) !== null);                              // no destination refused
+
+// size-aware chunking (ported from SweepFlow 0.2.23): a fat coin forces a byte-budget flush
+function fatCoin(id, addr, stateBytes) {
+  var c = coin(id, addr, "1");
+  c.state = [{ port: "0", data: "F".repeat(stateBytes * 2) }];   // 2 hex chars per byte
+  return c;
+}
+// 5 coins ~10K serialized each (~22K chunk cost each incl. proof copy + overhead) at ONE
+// address: input/key caps alone would pool all 5, the 48K budget must flush earlier.
+var fat = [1, 2, 3, 4, 5].map(function (i) { return fatCoin("0xF" + i, "0xaaa", 10 * 1024); });
+p = P.plan(fat, OWN);
+assert.ok(p.jobs.length >= 2, "byte budget must split fat coins (got " + p.jobs.length + " job(s))");
+p.jobs.forEach(function (j) { assert.ok(j.coins.length < 5); });
+
+// an oversized SINGLE whole (state coin past the budget) is planned LAST with a warning
+var bigNft = fatCoin("0xB1", "0xaaa", 30 * 1024);               // ~30K coin -> est ~100K > 48K
+bigNft.tokenid = "0xDEAD";
+bigNft.token = { name: "BigPlate", script: "RETURN TRUE" };
+var mix = [coin("0xC1", "0xaaa", "5"), bigNft];
+p = P.plan(mix, OWN);
+assert.strictEqual(p.oversized.length, 1);
+assert.ok(/attempted last/.test(p.oversized[0]));
+assert.strictEqual(p.jobs[p.jobs.length - 1].coins[0].coinid, "0xB1"); // heavy single is the LAST job
+assert.ok(p.jobs[p.jobs.length - 1].whole);
+// a normal-size whole still plans normally with no warning
+var smallNft = coin("0xC2", "0xaaa", "1");
+smallNft.tokenid = "0xBEEF";
+smallNft.token = { name: "SmallNft", script: "RETURN TRUE" };
+smallNft.state = [{ port: "0", data: "0x01" }];
+p = P.plan([smallNft], OWN);
+assert.strictEqual(p.oversized.length, 0);
+assert.strictEqual(p.jobs.length, 1);
+assert.ok(p.jobs[0].whole);
 
 console.log("sweep-plan.test.js: all checks passed");

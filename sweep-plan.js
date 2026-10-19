@@ -6,13 +6,27 @@
 (function (root) {
   "use strict";
 
-  // ponytail: static chunking keeps every pooled txn under the 64K TxPoW cap
-  // (4 classic WOTS sigs ~34K + 10 inputs' node-attached MMR proofs); byte-exact
-  // planning needs local serialization the node does for us — add if sweeps ever
-  // hit size refusals faster than the split-retry handles them.
   var MAX_INPUTS_PER_TXN = 10;
   var MAX_KEYS_PER_TXN   = 4;
   var PLAIN_TOKEN_SCRIPT = "RETURN TRUE";
+
+  /* Size-aware planning against the consensus TxPoW cap (64K), ported from apks/wallet
+     SweepFlow 0.2.23 ("sweep auto-fix for too-large transactions", proven live): each
+     coin's size is estimated locally and pooled chunks are built to a conservative 48K
+     budget on top of the input/key caps; oversized single coins are flagged and go LAST
+     so a refusal cannot block the rest. The split-on-refusal retry stays as the backstop. */
+  var TXN_BYTE_BUDGET = 48 * 1024;
+  var SIG_BYTES       = 9 * 1024;   // signature chain + its script proof
+  var INPUT_OVERHEAD  = 2 * 1024;   // MMR proof overhead per input
+  var TXN_FIXED       = 4 * 1024;   // txpow header, magic, outputs, slack
+
+  /** Estimated serialized byte size of a coin (state and token descriptor included).
+      The APK measures the real Coin serialization; here hex strings dominate the coin
+      JSON at 2 chars per byte, so half the JSON length is a close, slightly high proxy. */
+  function sizeOf(c) {
+    try { return Math.max(256, JSON.stringify(c).length >> 1); }
+    catch (e) { return 1024; }   // APK fallback value
+  }
 
   /* Exact decimal addition on strings — Minima amounts carry up to 44 decimals,
      far past IEEE-754. Non-negative inputs only. */
@@ -62,7 +76,7 @@
    * Each job: { whole, tokenid, coins, label, states } — states only on whole jobs.
    */
   function plan(zCoins, zOwnAddrs) {
-    var out = { jobs: [], skipped: [], totals: [], signatures: 0 };
+    var out = { jobs: [], skipped: [], totals: [], signatures: 0, oversized: [] };
     if (!zCoins || !zCoins.length) return out;
 
     var minima = [], fungible = {}, fungibleOrder = [], fungibleNames = {}, wholes = [];
@@ -95,11 +109,23 @@
     });
 
     // 1. State / scripted coins — one transaction each, state replayed verbatim.
+    //    Singles whose ESTIMATE exceeds the byte budget go LAST (attempted anyway — the
+    //    estimate is conservative and a refusal cannot block the rest of the sweep).
+    var heavy = [];
     wholes.forEach(function (w) {
-      out.jobs.push({
+      var est = TXN_FIXED + 3 * sizeOf(w.coin) + INPUT_OVERHEAD + SIG_BYTES;
+      var job = {
         whole: true, tokenid: w.coin.tokenid, coins: [w.coin],
         label: w.name + " (" + w.coin.coinid + ")", states: stateEntries(w.coin)
-      });
+      };
+      if (est > TXN_BYTE_BUDGET) {
+        heavy.push(job);
+        out.oversized.push(w.name + " (" + w.coin.coinid + ") — estimated ~" + Math.round(est / 1024)
+          + "K against the chain's 64K transaction cap; it will be attempted last and reported"
+          + " honestly if the node refuses it");
+      } else {
+        out.jobs.push(job);
+      }
       out.signatures++;
     });
     if (wholes.length) out.totals.push({ label: "NFT / state items", value: wholes.length + " item(s), sent whole" });
@@ -111,37 +137,46 @@
       chunkInto(out, fungible[tid], tid, fungibleNames[tid]);
     });
 
-    // 3. Native Minima last.
+    // 3. Native Minima next.
     if (minima.length) {
       out.totals.push({ label: "Minima", value: minimaTotal + " (" + minima.length + " coin(s))" });
       chunkInto(out, minima, "0x00", "Minima");
     }
 
+    // 4. Over-budget singles LAST — a refusal there can no longer block anything.
+    heavy.forEach(function (j) { out.jobs.push(j); });
+
     return out;
   }
 
   /** Same-address coins grouped (one signature covers them all), at most
-      MAX_KEYS_PER_TXN distinct addresses and MAX_INPUTS_PER_TXN inputs per txn. */
+      MAX_KEYS_PER_TXN distinct addresses and MAX_INPUTS_PER_TXN inputs per txn,
+      AND an estimated TXN_BYTE_BUDGET bytes per transaction. */
   function chunkInto(zPlan, zCoins, zTokenid, zName) {
     zCoins.sort(function (a, b) { return String(a.address) < String(b.address) ? -1 : 1; });
-    var chunk = [], addrs = [], part = 1;
+    var chunk = [], addrs = [], chunkBytes = 0, part = 1;
     function flush(last) {
       if (!chunk.length) return;
       zPlan.jobs.push({ whole: false, tokenid: zTokenid, coins: chunk,
         label: (part === 1 && last) ? zName : zName + " (part " + part + ")" });
       part++;
       zPlan.signatures += addrs.length;
-      chunk = []; addrs = [];
+      chunk = []; addrs = []; chunkBytes = 0;
     }
     zCoins.forEach(function (c) {
       var a = String(c.address).toUpperCase();
       var newKey = addrs.indexOf(a) < 0;
+      var coinCost = 2 * sizeOf(c) + INPUT_OVERHEAD;   // coin in txn + copy in its MMR proof
+      var addCost  = coinCost + (newKey ? SIG_BYTES : 0);
       if (chunk.length &&
-          (chunk.length >= MAX_INPUTS_PER_TXN || (newKey && addrs.length >= MAX_KEYS_PER_TXN))) {
+          (chunk.length >= MAX_INPUTS_PER_TXN
+           || (newKey && addrs.length >= MAX_KEYS_PER_TXN)
+           || TXN_FIXED + chunkBytes + addCost > TXN_BYTE_BUDGET)) {
         flush(false);
         newKey = true;
       }
       chunk.push(c);
+      chunkBytes += 2 * sizeOf(c) + INPUT_OVERHEAD + (newKey ? SIG_BYTES : 0);
       if (addrs.indexOf(a) < 0) addrs.push(a);
     });
     flush(true);
@@ -182,9 +217,31 @@
     return deps.encode32([0x01, (addr.length >> 8) & 0xFF, addr.length & 0xFF].concat(addr, checksum));
   }
 
+  /** Hard gate before any sweep: the destination must be a well-formed Mx address whose
+      checksum matches its 0x form, and must EXIST in zBlockKeys (the derived
+      block-as-keyuses set). Returns null when valid, otherwise the refusal reason. */
+  function validateDestination(d, zBlockKeys, deps) {
+    if (!d || typeof d.miniaddress !== "string" || !MX_RE.test(d.miniaddress))
+      return "destination is not a well-formed Mx address";
+    try {
+      if (mxFromHex(d.address, deps) !== d.miniaddress)
+        return "Mx checksum does not match the destination address " + d.miniaddress
+             + " (0x form: " + d.address + ")";
+    } catch (e) {
+      return "Mx checksum could not be verified: " + String(e && e.message || e);
+    }
+    var exists = (zBlockKeys || []).some(function (b) {
+      return b.index === d.index && b.address === d.address && b.miniaddress === d.miniaddress;
+    });
+    if (!exists) return "destination " + d.miniaddress + " is not one of this seed's derived block-as-keyuses keys";
+    return null;
+  }
+
   root.SweepPlan = {
     MAX_INPUTS_PER_TXN: MAX_INPUTS_PER_TXN,
     MAX_KEYS_PER_TXN: MAX_KEYS_PER_TXN,
+    TXN_BYTE_BUDGET: TXN_BYTE_BUDGET,
+    sizeOf: sizeOf,
     decAdd: decAdd,
     normalizeScript: normalizeScript,
     coinAmount: coinAmount,
@@ -194,7 +251,8 @@
     split: split,
     isSizeRefusal: isSizeRefusal,
     MX_RE: MX_RE,
-    mxFromHex: mxFromHex
+    mxFromHex: mxFromHex,
+    validateDestination: validateDestination
   };
   if (typeof module !== "undefined" && module.exports) module.exports = root.SweepPlan;
 

@@ -55,7 +55,7 @@
         .arow:last-child { border-bottom: none; }
         .arow:hover { background: rgba(247,147,26,0.05); }
         .arow.sel { background: rgba(247,147,26,0.1); border-left: 3px solid var(--accent); padding-left: 9px; }
-        .arow input { accent-color: var(--accent); margin-top: 3px; flex-shrink: 0; }
+        .arow input { accent-color: var(--accent); margin-top: 3px; flex-shrink: 0; pointer-events: none; }
         .arow .kn { color: var(--text-dim); font-size: 0.75rem; min-width: 32px; flex-shrink: 0; padding-top: 2px; }
         .arow .amono { font-family: ui-monospace, Menlo, monospace; font-size: 0.74rem; word-break: break-all; line-height: 1.5; color: var(--text); flex: 1; }
         .arow .copy { flex-shrink: 0; font-size: 0.72rem; color: var(--text-dim); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; cursor: pointer; font-family: inherit; }
@@ -389,6 +389,7 @@ function renderBlockList() {
     if (derived.block.length) selectDest(derived.block[0], box.firstChild);
 }
 function selectDest(d, row) {
+    if (sweeping) return;   // destination is frozen once a sweep is running
     destKey = d;
     var box = document.getElementById("blockList");
     Array.prototype.forEach.call(box.children, function (r) { r.classList.remove("sel"); r.querySelector("input").checked = false; });
@@ -433,6 +434,10 @@ function renderPlan() {
         html += '<details><summary>Skipping ' + p.skipped.length + ' coin(s)</summary><div class="note">'
               + p.skipped.map(esc).join("<br>") + '</div></details>';
     }
+    if (p.oversized && p.oversized.length) {
+        html += '<details open><summary>' + p.oversized.length + ' large item(s) — attempted last</summary><div class="note">'
+              + p.oversized.map(esc).join("<br>") + '</div></details>';
+    }
     html += '<div class="note">Transactions are signed and broadcast one by one by this node '
           + '(<code class="inl">txnsign publickey:auto</code>); nothing is called swept until the chain confirms '
           + 'each coin\'s spend. A too-large batch is split and retried automatically; a failed transaction never '
@@ -459,30 +464,13 @@ function setSweepProg(done, total, label) {
     document.getElementById("sweepLabel").textContent = label;
 }
 
-/* Hard gate before any sweep: the destination must be a well-formed Mx address whose
-   checksum matches its 0x form, and must EXIST in the derived block-as-keyuses set.
-   Returns null when valid, otherwise the reason the sweep is refused. */
-function validateDestination(d) {
-    if (!d || typeof d.miniaddress !== "string" || !SweepPlan.MX_RE.test(d.miniaddress))
-        return "destination is not a well-formed Mx address";
-    try {
-        var deps = { fromHex: KeyUsesDerive._fromHex, encode32: KeyUsesDerive._encode32, sha3: sha3_256 };
-        if (SweepPlan.mxFromHex(d.address, deps) !== d.miniaddress)
-            return "Mx checksum does not match the destination address " + d.miniaddress;
-    } catch (e) {
-        return "Mx checksum could not be verified: " + String(e && e.message || e);
-    }
-    var exists = derived.block.some(function (b) {
-        return b.index === d.index && b.address === d.address && b.miniaddress === d.miniaddress;
-    });
-    if (!exists) return "destination " + d.miniaddress + " is not one of this seed's derived block-as-keyuses keys";
-    return null;
-}
-
 function executeSweep() {
     if (sweeping || !verified || !destKey || !currentPlan || !currentPlan.jobs.length) return;
     document.getElementById("log").textContent = "";
-    var destErr = validateDestination(destKey);
+    // Hard gate (SweepPlan.validateDestination): Mx-only format, checksum matches the
+    // 0x form, and the key EXISTS in the derived block-as-keyuses set — or no sweep.
+    var destErr = SweepPlan.validateDestination(destKey, derived.block,
+        { fromHex: KeyUsesDerive._fromHex, encode32: KeyUsesDerive._encode32, sha3: sha3_256 });
     if (destErr) {
         log("SWEEP REFUSED — " + destErr);
         log("Nothing was sent. Re-run the derivation and pick the destination again.");
