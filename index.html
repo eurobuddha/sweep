@@ -511,9 +511,29 @@ function nextJob(st) {
 }
 
 /** Build, sign and post one job: txncreate → inputs → [state] → output → sign+post.
- *  Every error path runs txndelete. cb(ok, txpowidOrError). */
+ *  Every error path runs txndelete. cb(ok, txpowidOrError) is ALWAYS called exactly once:
+ *  mds.js never invokes the callback on an HTTP error (and throws on an empty reply from a
+ *  dropped node), which would wedge the batch silently mid-sweep — so a watchdog fails the
+ *  job honestly if the node says nothing for CMD_TIMEOUT_MS and the batch moves on. */
+var CMD_TIMEOUT_MS = 120000;
 function runJob(job, cb) {
     var id = "sweep" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
+    var done = false, watchdog = null;
+    function finish(ok, result) {
+        if (done) return;
+        done = true;
+        clearTimeout(watchdog);
+        cb(ok, result);
+    }
+    function armWatchdog() {
+        clearTimeout(watchdog);
+        watchdog = setTimeout(function () {
+            MDS.cmd("txndelete id:" + id, function () {});   // best-effort cleanup
+            finish(false, "node did not respond within " + (CMD_TIMEOUT_MS / 1000) + "s — if the "
+                + "transaction was not broadcast its coins are untouched; either way the next plan "
+                + "shows exactly what is still here");
+        }, CMD_TIMEOUT_MS);
+    }
     var steps = [];
     steps.push("txncreate id:" + id);
     job.coins.forEach(function (c) { steps.push("txninput id:" + id + " coinid:" + c.coinid); });
@@ -521,7 +541,7 @@ function runJob(job, cb) {
         for (var s = 0; s < job.states.length; s++) {
             var sv = job.states[s];
             if (String(sv.data).indexOf('"') >= 0) {   // unquotable — refuse honestly, don't mangle state
-                cb(false, "state port " + sv.port + " contains a double quote; sweep this coin manually");
+                finish(false, "state port " + sv.port + " contains a double quote; sweep this coin manually");
                 return;
             }
             steps.push('txnstate id:' + id + ' port:' + sv.port + ' value:"' + sv.data + '"');
@@ -536,23 +556,27 @@ function runJob(job, cb) {
 
     var k = 0;
     function run() {
+        armWatchdog();
         MDS.cmd(steps[k], function (res) {
-            if (res.pending) { abort("command pending — WRITE permission required"); return; }
+            if (done) return;   // watchdog already failed this job; a late reply changes nothing
+            if (!res || res.pending) { abort(res ? "command pending — WRITE permission required" : "empty node response"); return; }
             if (!res.status) { abort(res.error || "command failed: " + steps[k]); return; }
             k++;
             if (k >= steps.length) {
                 // success — txndelete:true already cleaned the txn row
                 var r = res.response || {};
                 var txpowid = (r.txpow && r.txpow.txpowid) ? r.txpow.txpowid : "(txpowid unavailable)";
-                cb(true, txpowid);
+                finish(true, txpowid);
                 return;
             }
             run();
         });
     }
     function abort(reason) {
-        // HARD RULE: every txn error path runs txndelete (harmless if the row never existed)
-        MDS.cmd("txndelete id:" + id, function () { cb(false, reason); });
+        // HARD RULE: every txn error path runs txndelete (harmless if the row never existed).
+        // The watchdog stays armed so a dead node cannot wedge the cleanup either.
+        armWatchdog();
+        MDS.cmd("txndelete id:" + id, function () { finish(false, reason); });
     }
     run();
 }

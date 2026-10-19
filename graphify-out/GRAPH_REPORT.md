@@ -1,16 +1,16 @@
 # Graph Report - sweep  (2026-10-19)
 
 ## Corpus Check
-- 8 files · ~13,511 words
+- 8 files · ~14,273 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 62 nodes · 117 edges · 8 communities (7 shown, 1 thin omitted)
+- 65 nodes · 124 edges · 9 communities (7 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `73fd6767`
+- Built from commit: `78929987`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -21,11 +21,12 @@
 - Keccak
 - treeKeyPublicKey
 - addressFromPublicKey
+- sweep-plan.test.js
 
 ## God Nodes (most connected - your core abstractions)
-1. `treeKeyPublicKey()` - 8 edges
-2. `addressFromPublicKey()` - 8 edges
-3. `plan()` - 7 edges
+1. `plan()` - 8 edges
+2. `treeKeyPublicKey()` - 8 edges
+3. `addressFromPublicKey()` - 8 edges
 4. `hashConcat()` - 7 edges
 5. `Keccak()` - 7 edges
 6. `SHA3()` - 6 edges
@@ -45,11 +46,11 @@
 ## Import Cycles
 - None detected.
 
-## Communities (8 total, 1 thin omitted)
+## Communities (9 total, 2 thin omitted)
 
 ### Community 0 - "sweep-plan.js"
-Cohesion: 0.24
-Nodes (10): chunkInto(), coinAmount(), decAdd(), isMinima(), jobSum(), normalizeScript(), padEnd(), plan() (+2 more)
+Cohesion: 0.27
+Nodes (13): chunkInto(), coinAmount(), decAdd(), isMinima(), jobSum(), mxFromHex(), normalizeScript(), padEnd() (+5 more)
 
 ### Community 1 - "derive.js"
 Cohesion: 0.29
@@ -68,7 +69,7 @@ Cohesion: 0.50
 Nodes (5): addressFromPublicKey(), deriveAddress(), modifierBytes(), privateSeed(), toHexUpper()
 
 ## Knowledge Gaps
-- **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_

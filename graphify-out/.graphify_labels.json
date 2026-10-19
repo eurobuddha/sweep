@@ -6,5 +6,6 @@
   "4": "treeKeyPublicKey",
   "5": "addressFromPublicKey",
   "6": "derive.worker.js",
-  "7": "wordlist.js"
+  "7": "wordlist.js",
+  "8": "sweep-plan.test.js"
 }

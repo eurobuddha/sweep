@@ -20,13 +20,13 @@
     "semantic_hash": "4e908174deac13b8b643dd3c4c230367"
   },
   "sweep-plan.js": {
-    "mtime": 1792416112.5030649,
-    "ast_hash": "3eef069376d0d6d21fea09c4a07b55c5",
+    "mtime": 1792440143.6873205,
+    "ast_hash": "a0c4b9faee9cea1b994809cab572fe1f",
     "semantic_hash": ""
   },
   "sweep-plan.test.js": {
-    "mtime": 1792416193.1843421,
-    "ast_hash": "a4032b6740efe18e809aeea1c2da4fdd",
+    "mtime": 1792440190.8343818,
+    "ast_hash": "2ff7833cfda0509d0edc00c1bf8c6c2c",
     "semantic_hash": ""
   },
   "wordlist.js": {
@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1792416125.6168604,
-    "ast_hash": "728d6e6996adbf3aaf8de73492ee140c",
+    "mtime": 1792440143.7289014,
+    "ast_hash": "ad5c5070dd088abe1c75264f6b297637",
     "semantic_hash": ""
   },
   "icon.svg": {

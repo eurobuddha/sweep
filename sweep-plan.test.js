@@ -139,4 +139,47 @@ assert.strictEqual(p.oversized.length, 0);
 assert.strictEqual(p.jobs.length, 1);
 assert.ok(p.jobs[0].whole);
 
-console.log("sweep-plan.test.js: all checks passed");
+// runJob watchdog — exercised on the REAL code extracted from index.html (mds.js never
+// calls back on an HTTP error, so a silent node must fail the job, once, not wedge it).
+var src = require("fs").readFileSync(__dirname + "/index.html", "utf8");
+var m = src.match(/var CMD_TIMEOUT_MS[\s\S]*?\n}\n\n\/\* -+ confirm on-chain/);
+assert.ok(m, "runJob block found in index.html");
+var runJobSrc = m[0].replace(/\n}\n\n\/\* -+ confirm on-chain$/, "\n}")
+                    .replace("120000", "150");          // shrink the watchdog for the test
+function harness(mdsCmd) {
+  var sandbox = { MDS: { cmd: mdsCmd }, SweepPlan: P, destKey: goodDest,
+                  setTimeout: setTimeout, clearTimeout: clearTimeout, Date: Date, Math: Math, String: String };
+  require("vm").createContext(sandbox);
+  require("vm").runInContext(runJobSrc, sandbox);
+  return sandbox.runJob;
+}
+var job1 = { whole: false, tokenid: "0x00", coins: [coin("0xE1", "0xaaa", "1")], label: "t" };
+var calls = [];
+// 1. silent node: no callback ever -> watchdog fails the job exactly once, txndelete attempted
+harness(function (c, cb) { calls.push(c); /* never calls back */ })(job1, function (ok, why) {
+  assert.strictEqual(ok, false);
+  assert.ok(/did not respond/.test(why));
+  setTimeout(function () {
+    assert.ok(calls.some(function (c) { return c.indexOf("txndelete") === 0; }), "cleanup txndelete issued");
+
+    // 2. happy path: every command succeeds -> cb(true, txpowid) exactly once
+    var n = 0;
+    harness(function (c, cb) { cb({ status: true, response: { txpow: { txpowid: "0xT1" } } }); })(
+      job1, function (ok, id) {
+        n++;
+        assert.strictEqual(ok, true); assert.strictEqual(id, "0xT1"); assert.strictEqual(n, 1);
+
+        // 3. command error -> txndelete runs, cb(false) exactly once even with a late extra reply
+        var seq = [], cbs = 0;
+        harness(function (c, cb) {
+          seq.push(c);
+          cb(c.indexOf("txndelete") === 0 ? { status: true } : { status: false, error: "boom" });
+        })(job1, function (ok2, why2) {
+          cbs++;
+          assert.strictEqual(ok2, false); assert.ok(/boom/.test(why2)); assert.strictEqual(cbs, 1);
+          assert.ok(seq.some(function (c) { return c.indexOf("txndelete") === 0; }));
+          console.log("sweep-plan.test.js: all checks passed");
+        });
+      });
+  }, 250);
+});
