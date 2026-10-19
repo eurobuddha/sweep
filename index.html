@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store">
+    <title>Sweep — Classic → Block-as-keyuses</title>
+    <script type="text/javascript" src="mds.js"></script>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0a0a0f; --card: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.07);
+            --text: #e8e6e3; --text-dim: rgba(232,230,227,0.7); --accent: #f7931a;
+            --ok: #4ade80; --warn: #fbbf24; --risk: #f87171;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px 16px; display: flex; justify-content: center; }
+        .container { max-width: 820px; width: 100%; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); padding: 4px 12px; background: rgba(247,147,26,0.08); border-radius: 4px; margin-bottom: 16px; }
+        .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+        h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+        h1 .v { color: var(--text-dim); font-weight: 400; font-size: 0.6em; margin-left: 6px; }
+        .subtitle { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 22px; font-weight: 300; line-height: 1.6; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 18px; }
+        .section-label { display: block; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; font-weight: 600; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--accent), #ff5e3a); color: #231303; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.3s, transform 0.15s; }
+        .btn:hover { opacity: 0.92; } .btn:active { transform: scale(0.99); } .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-danger { background: linear-gradient(135deg, #dc2626, #991b1b); color: #fff; }
+        .btn-sec { background: transparent; border: 1px solid var(--border); color: var(--text-dim); margin-top: 10px; }
+        .btn-sec:hover { border-color: rgba(247,147,26,0.3); color: var(--text); }
+        textarea { width: 100%; min-height: 80px; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--text); font-family: ui-monospace, Menlo, monospace; font-size: 0.82rem; line-height: 1.5; outline: none; resize: vertical; margin-bottom: 12px; }
+        textarea:focus { border-color: rgba(247,147,26,0.3); }
+        .chk { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; user-select: none; font-size: 0.82rem; color: var(--text-dim); }
+        .chk input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; margin-top: 1px; }
+        .note { font-size: 0.78rem; color: var(--text-dim); line-height: 1.65; margin-top: 12px; } .note strong { color: var(--text); font-weight: 600; }
+        .hidden { display: none; }
+        .chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 14px; }
+        .chip { display:inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .chip.ok { background: rgba(74,222,128,0.12); color: var(--ok); }
+        .chip.risk { background: rgba(248,113,113,0.14); color: var(--risk); }
+        .chip.warn { background: rgba(251,191,36,0.14); color: var(--warn); }
+        .chip.dim { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+        .verdict { border-radius: 14px; padding: 18px; margin-bottom: 14px; border: 1px solid; }
+        .verdict h2 { font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
+        .verdict.ok { background: rgba(74,222,128,0.07); border-color: rgba(74,222,128,0.3); color: var(--ok); }
+        .verdict.warn { background: rgba(251,191,36,0.07); border-color: rgba(251,191,36,0.3); color: var(--warn); }
+        .verdict.risk { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.35); color: var(--risk); }
+        .verdict p { color: var(--text); font-size: 0.83rem; line-height: 1.6; }
+        .progress { height: 8px; background: rgba(0,0,0,0.3); border-radius: 6px; overflow: hidden; margin: 14px 0 6px; }
+        .progress > i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), #ff5e3a); width: 100%; transform: scaleX(0); transform-origin: left; transition: transform 0.2s; }
+        .plabel { font-size: 0.75rem; color: var(--text-dim); text-align: center; }
+        .status { margin-top: 14px; padding: 12px; border-radius: 10px; font-size: 0.8rem; display:none; line-height: 1.6; }
+        .status.show { display:block; } .status.error { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); color: var(--risk); }
+        .addrlist { max-height: 340px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; }
+        .arow { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .arow:last-child { border-bottom: none; }
+        .arow:hover { background: rgba(247,147,26,0.05); }
+        .arow.sel { background: rgba(247,147,26,0.1); border-left: 3px solid var(--accent); padding-left: 9px; }
+        .arow input { accent-color: var(--accent); margin-top: 3px; flex-shrink: 0; }
+        .arow .kn { color: var(--text-dim); font-size: 0.75rem; min-width: 32px; flex-shrink: 0; padding-top: 2px; }
+        .arow .amono { font-family: ui-monospace, Menlo, monospace; font-size: 0.74rem; word-break: break-all; line-height: 1.5; color: var(--text); flex: 1; }
+        .arow .copy { flex-shrink: 0; font-size: 0.72rem; color: var(--text-dim); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; cursor: pointer; font-family: inherit; }
+        .arow .copy:hover { color: var(--accent); border-color: rgba(247,147,26,0.4); }
+        .vrow { display:flex; gap:10px; align-items:flex-start; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.74rem; }
+        .vrow:last-child { border-bottom: none; }
+        .vrow .amono { font-family: ui-monospace, Menlo, monospace; word-break: break-all; color: var(--text-dim); flex:1; line-height: 1.5; }
+        .vrow .vmark { flex-shrink:0; font-weight:700; }
+        .vrow .vmark.ok { color: var(--ok); } .vrow .vmark.bad { color: var(--risk); }
+        details summary { cursor: pointer; font-size: 0.8rem; color: var(--text-dim); margin: 10px 0; user-select: none; }
+        pre.log { background: rgba(0,0,0,0.35); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; color: var(--text-dim); max-height: 320px; overflow-y: auto; margin-top: 12px; }
+        table.totals { width:100%; border-collapse: collapse; font-size: 0.82rem; margin: 10px 0; }
+        table.totals td { padding: 7px 8px; border-bottom: 1px solid var(--border); }
+        table.totals td:last-child { text-align: right; font-family: ui-monospace, Menlo, monospace; color: var(--text); }
+        table.totals td:first-child { color: var(--text-dim); }
+        code.inl { background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 5px; font-family: ui-monospace, Menlo, monospace; font-size: 0.92em; word-break: break-all; }
+        .footer { text-align: center; margin-top: 18px; font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+        .spin { display:inline-block; width:14px; height:14px; border:2px solid rgba(35,19,3,0.3); border-top-color:#231303; border-radius:50%; animation: s 0.7s linear infinite; vertical-align:-2px; margin-right:8px; }
+        @keyframes s { to { transform: rotate(360deg); } }
+        .destbox { background: rgba(0,0,0,0.35); border: 1px solid rgba(247,147,26,0.35); border-radius: 10px; padding: 12px; margin-top: 12px; }
+        .destbox label { display:block; font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px; }
+        .destbox code { display:block; font-family: ui-monospace, Menlo, monospace; font-size: 0.76rem; color: var(--accent); word-break: break-all; line-height: 1.5; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="badge">Minima · Key-scheme migration</div>
+    <h1>Sweep <span class="v" id="ver"></span></h1>
+    <p class="subtitle">
+        Derives this node's seed into <strong>both key schemes on-device</strong> — the classic
+        <strong>64 keys</strong> this node runs on, and the <strong>32 block-as-keyuses keys</strong> the same
+        seed produces on a <code class="inl">-blockaskeyuses</code> node — <strong>proves</strong> the classic set
+        byte-exact against this node's own wallet, then sweeps everything to one of the new keys in
+        <strong>one action</strong>. The seed never leaves this dapp.
+    </p>
+
+    <!-- 1 · Node & seed -->
+    <div class="card">
+        <span class="section-label">1 · Node &amp; seed</span>
+        <div class="chips" id="nodeChips"><span class="chip dim">connecting…</span></div>
+        <button class="btn" id="deriveBtn" onclick="startDerive()" disabled>Read seed &amp; derive both key sets</button>
+        <button class="btn btn-sec" id="phraseToggle" onclick="togglePhrase()">Type a seed phrase instead</button>
+        <div id="phrasePanel" class="hidden" style="margin-top:12px">
+            <textarea id="phrase" placeholder="word one two three …  (24 or 12 BIP39 words)" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
+            <label class="chk"><input type="checkbox" id="anyphrase"> This is an “anyphrase” (not standard BIP39 words)</label>
+        </div>
+        <div id="prog" class="hidden">
+            <div class="progress"><i id="progBar"></i></div>
+            <div class="plabel" id="progLabel"></div>
+        </div>
+        <div class="status" id="statusBox"></div>
+        <div class="note">Derivation is ~96 hash-tree keys (~0.5–1M SHA3 each); a worker pool keeps the
+        UI alive. Needs <strong>WRITE</strong> permission (reads the vault seed, builds and posts transactions):
+        <code class="inl">mds action:permission uid:&lt;this dapp's uid&gt; trust:write</code></div>
+    </div>
+
+    <!-- 2 · Verification -->
+    <div class="card hidden" id="verifyCard">
+        <span class="section-label">2 · Derivation proof — classic 64 keys vs this node's wallet</span>
+        <div id="verifyVerdict"></div>
+        <details><summary>Show all 64 derived classic addresses</summary>
+            <div class="addrlist" id="classicList"></div>
+        </details>
+    </div>
+
+    <!-- 3 · Destination -->
+    <div class="card hidden" id="destCard">
+        <span class="section-label">3 · Destination — the same seed's 32 block-as-keyuses keys</span>
+        <div class="note" style="margin:0 0 12px">These addresses belong to <strong>your seed</strong> on a node started
+        with <code class="inl">-blockaskeyuses</code> (minimaCore&nbsp;1.1.2.31+). Pick one — key&nbsp;#1 unless you
+        have a reason. After the sweep, this classic node will show the funds as <strong>gone</strong>; they appear
+        when you run the same seed on a block-as-keyuses node.</div>
+        <div class="addrlist" id="blockList"></div>
+    </div>
+
+    <!-- 4 · Sweep -->
+    <div class="card hidden" id="sweepCard">
+        <span class="section-label">4 · Sweep everything</span>
+        <div id="planBox"></div>
+        <div class="destbox"><label>Sweeping to (block-as-keyuses key <span id="destIdx"></span>)</label>
+            <code id="destMx"></code><code id="destHex" style="color:var(--text-dim);margin-top:4px"></code></div>
+        <label class="chk" style="margin-top:14px"><input type="checkbox" id="armChk" onchange="armChanged()">
+            I understand this is <strong>&nbsp;irreversible&nbsp;</strong> and the funds will only be visible on a
+            <strong>&nbsp;-blockaskeyuses&nbsp;</strong> node restored from this same seed.</label>
+        <button class="btn btn-danger" id="sweepBtn" style="margin-top:12px" onclick="executeSweep()" disabled>Sweep everything</button>
+        <div id="sweepProg" class="hidden">
+            <div class="progress"><i id="sweepBar"></i></div>
+            <div class="plabel" id="sweepLabel"></div>
+        </div>
+        <div id="confirmBox"></div>
+        <pre class="log hidden" id="log"></pre>
+    </div>
+
+    <div class="footer">eurobuddha · Minima Ecosystem · Sweep v<span id="verF"></span></div>
+</div>
+
+<script src="sha3.js"></script>
+<script src="wordlist.js"></script>
+<script src="derive.js"></script>
+<script src="sweep-plan.js"></script>
+<script>
+var VERSION = "0.1.0";
+document.getElementById("ver").textContent = "v" + VERSION;
+document.getElementById("verF").textContent = VERSION;
+
+var MODE_WRITE = false, INITED = false, busy = false;
+var derived = { classic: [], block: [] };   // {index, address(0x), miniaddress, publickey}
+var ownSimple = {};                          // UPPER(0x) -> true : addresses txnsign auto covers
+var nodeDefaults = [];                       // node's default simple 0x addresses (UPPER)
+var verified = false;
+var destKey = null;                          // selected block key object
+var currentPlan = null;
+var sweeping = false;
+var confirmWatch = null;                     // { remaining:[], total, txpowids:[], dest, polls }
+
+/* ---------- init ---------- */
+MDS.init(function (msg) {
+    if (msg.event === "inited") {
+        INITED = true;
+        MDS.cmd("checkmode", function (res) {
+            MODE_WRITE = !!(res.status && res.response && (res.response.mode === "WRITE" || res.response.writemode === true));
+            renderChips();
+            document.getElementById("deriveBtn").disabled = !MODE_WRITE;
+            if (!MODE_WRITE) showError("This dapp has READ permission only. Give it WRITE in the terminal: mds action:permission uid:<uid> trust:write — then reopen. (You can still derive from a typed phrase, but sweeping needs WRITE.)");
+        });
+    } else if (msg.event === "NEWBLOCK") {
+        if (confirmWatch) pollConfirmations();
+    }
+});
+
+function renderChips() {
+    var c = document.getElementById("nodeChips");
+    c.innerHTML = "";
+    chip(c, INITED ? "ok" : "risk", INITED ? "MDS connected" : "MDS offline");
+    chip(c, MODE_WRITE ? "ok" : "risk", MODE_WRITE ? "WRITE mode" : "READ-only — sweeping disabled");
+    if (verified) chip(c, "ok", "derivation proven");
+}
+function chip(parent, cls, text) {
+    var s = document.createElement("span"); s.className = "chip " + cls; s.textContent = text; parent.appendChild(s);
+}
+function showError(m) { var b = document.getElementById("statusBox"); b.textContent = m; b.className = "status show error"; }
+function clearError() { document.getElementById("statusBox").className = "status"; }
+function setBusy(b, label) {
+    busy = b;
+    var x = document.getElementById("deriveBtn");
+    x.disabled = b || (!MODE_WRITE && !phraseOpen());
+    x.innerHTML = b ? ('<span class="spin"></span>' + (label || "Working…")) : "Read seed &amp; derive both key sets";
+    document.getElementById("prog").classList.toggle("hidden", !b);
+}
+function setProg(done, total, label) {
+    document.getElementById("progBar").style.transform = "scaleX(" + (total ? done / total : 0) + ")";
+    document.getElementById("progLabel").textContent = label || (done + " / " + total);
+}
+function phraseOpen() { return !document.getElementById("phrasePanel").classList.contains("hidden"); }
+function togglePhrase() {
+    var p = document.getElementById("phrasePanel");
+    p.classList.toggle("hidden");
+    document.getElementById("phraseToggle").textContent = phraseOpen() ? "Use the node's own vault seed instead" : "Type a seed phrase instead";
+    document.getElementById("deriveBtn").disabled = busy || (!MODE_WRITE && !phraseOpen());
+}
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+/* ---------- derive ---------- */
+function startDerive() {
+    if (busy) return;
+    clearError();
+    if (phraseOpen()) {
+        var raw = document.getElementById("phrase").value;
+        if (!raw.trim()) { showError("Type your seed phrase first."); return; }
+        var seedHex;
+        try {
+            var seed = KeyUsesDerive.seedFromPhrase(raw, document.getElementById("anyphrase").checked);
+            seedHex = "0x" + KeyUsesDerive._toHexUpper(seed);
+        } catch (e) { showError(e.message + "  (If your seed uses a custom passphrase, tick “anyphrase”.)"); return; }
+        deriveBoth(seedHex);
+        return;
+    }
+    // the node's own vault — seed hex directly, works for BIP39 and anyphrase nodes alike
+    setBusy(true, "Reading vault…");
+    MDS.cmd("vault", function (res) {
+        if (res.pending) { setBusy(false); showError("The vault command is PENDING — this dapp needs WRITE permission (or accept the pending command in MiniHub) and try again."); return; }
+        var v = res.status ? res.response : null;
+        var seedHex = v && typeof v.seed === "string" ? v.seed : "";
+        if (!/^0x[0-9A-Fa-f]{64}$/.test(seedHex)) {
+            setBusy(false);
+            showError("Could not read the seed from the vault" + (v && v.locked ? " — the node is password-locked. Unlock it (vault action:passwordunlock) or type the phrase instead." : ": " + (res.error || "unexpected response")));
+            return;
+        }
+        deriveBoth(seedHex.toUpperCase().replace(/^0X/, "0x"));
+    });
+}
+
+function deriveBoth(seedHex) {
+    var jobs = [];
+    for (var i = 0; i < 64; i++) jobs.push({ index: i, keysPerLevel: 64 });
+    for (var j = 0; j < 32; j++) jobs.push({ index: j, keysPerLevel: 128 });
+    setBusy(true, "Deriving keys…");
+    setProg(0, jobs.length, "Deriving key 0 / " + jobs.length + " …");
+    deriveAll(seedHex, jobs, function (all) {
+        derived.classic = all.filter(function (d) { return d.keysPerLevel === 64; });
+        derived.block = all.filter(function (d) { return d.keysPerLevel === 128; });
+        verifyAgainstNode();
+    });
+}
+
+/* Worker pool (from keyuses-phrase, proven): one key per message, inline fallback. */
+function deriveAll(seedHex, jobs, done) {
+    var n = jobs.length, out = {}, completed = 0, nextJob = 0, failed = null;
+    function keyOf(kpl, idx) { return kpl + ":" + idx; }
+    function finishOne(res) {
+        if (res.ok === false) { failed = res.error; }
+        else out[keyOf(res.keysPerLevel, res.index)] = { index: res.index, keysPerLevel: res.keysPerLevel, address: res.address, miniaddress: res.miniaddress, publickey: res.publickey };
+        completed++;
+        setProg(completed, n, "Deriving key " + completed + " / " + n + " …");
+        if (completed >= n) {
+            if (failed) { setBusy(false); showError("Key derivation failed: " + failed); return; }
+            done(jobs.map(function (jb) { return out[keyOf(jb.keysPerLevel, jb.index)]; }));
+        }
+    }
+    var poolSize = 0, workers = [];
+    try {
+        var hw = (navigator && navigator.hardwareConcurrency) || 4;
+        poolSize = Math.max(1, Math.min(hw, 8, n));
+        for (var w = 0; w < poolSize; w++) workers.push(new Worker("derive.worker.js"));
+    } catch (e) { poolSize = 0; workers = []; }
+    if (poolSize > 0) {
+        var pump = function (worker) {
+            if (nextJob < n) { var jb = jobs[nextJob++]; worker.postMessage({ baseSeedHex: seedHex, index: jb.index, keysPerLevel: jb.keysPerLevel }); }
+            else worker.terminate();
+        };
+        workers.forEach(function (worker) {
+            worker.onmessage = function (ev) { finishOne(ev.data); pump(worker); };
+            pump(worker);
+        });
+    } else {
+        var seedBytes = KeyUsesDerive._fromHex(seedHex);
+        var step = function () {
+            if (nextJob >= n) return;
+            var jb = jobs[nextJob++];
+            var a = KeyUsesDerive.deriveAddress(seedBytes, jb.index, null, jb.keysPerLevel);
+            finishOne({ ok: true, index: jb.index, keysPerLevel: a.keysPerLevel, address: a.hex, miniaddress: a.mx, publickey: a.publickey });
+            setTimeout(step, 0);
+        };
+        step();
+    }
+}
+
+/* ---------- verification gate: derived classic 64 ⟷ node's own wallet ---------- */
+function verifyAgainstNode() {
+    setProg(96, 96, "Checking against this node's wallet …");
+    MDS.cmd("scripts", function (res) {
+        setBusy(false);
+        var rows = (res.status && Array.isArray(res.response)) ? res.response : [];
+        ownSimple = {}; nodeDefaults = [];
+        rows.forEach(function (r) {
+            if (r.simple === true) {
+                ownSimple[String(r.address).toUpperCase()] = true;
+                if (r["default"] === true) nodeDefaults.push(String(r.address).toUpperCase());
+            }
+        });
+        var classicSet = {}, blockSet = {};
+        derived.classic.forEach(function (d) { classicSet[d.address.toUpperCase()] = true; });
+        derived.block.forEach(function (d) { blockSet[d.address.toUpperCase()] = true; });
+
+        var matched = nodeDefaults.filter(function (a) { return classicSet[a]; }).length;
+        var matchedBlock = nodeDefaults.filter(function (a) { return blockSet[a]; }).length;
+        verified = nodeDefaults.length > 0 && matched === nodeDefaults.length;
+
+        var v = document.getElementById("verifyVerdict");
+        if (verified) {
+            v.innerHTML = '<div class="verdict ok"><h2>✓ Proven — this seed IS this node\'s wallet</h2>'
+                + '<p>All <strong>' + nodeDefaults.length + '</strong> of this node\'s default wallet addresses were '
+                + 'reproduced byte-exact by the on-device derivation. The 32 block-as-keyuses addresses below come '
+                + 'from the <strong>same seed by the same proven math</strong>, so sweeping to one of them keeps the '
+                + 'funds under this seed\'s control.</p></div>';
+        } else if (matchedBlock === nodeDefaults.length && nodeDefaults.length > 0) {
+            v.innerHTML = '<div class="verdict warn"><h2>⚠ This node is ALREADY block-as-keyuses</h2>'
+                + '<p>Its default addresses match the 128-leaf (block-as-keyuses) derivation, not the classic one. '
+                + 'There is nothing to migrate — sweeping to these keys would send the coins where they already are. '
+                + 'Sweeping stays disabled.</p></div>';
+        } else {
+            v.innerHTML = '<div class="verdict risk"><h2>✗ Derivation does NOT match this node</h2>'
+                + '<p>Only ' + matched + ' of ' + nodeDefaults.length + ' node default addresses matched the derived '
+                + 'classic set. Either the typed phrase is not this node\'s seed, or the node was created with '
+                + 'non-standard keys. <strong>Sweeping is disabled</strong> — a destination derived from the wrong '
+                + 'seed would burn the funds.</p></div>';
+        }
+        renderClassicList(classicSet);
+        renderBlockList();
+        renderChips();
+        document.getElementById("verifyCard").classList.remove("hidden");
+        document.getElementById("destCard").classList.remove("hidden");
+        if (verified) loadCoinsAndPlan();
+    });
+}
+
+function renderClassicList() {
+    var box = document.getElementById("classicList");
+    box.innerHTML = "";
+    var defSet = {};
+    nodeDefaults.forEach(function (a) { defSet[a] = true; });
+    derived.classic.forEach(function (d) {
+        var ok = !!defSet[d.address.toUpperCase()];
+        var row = document.createElement("div");
+        row.className = "vrow";
+        row.innerHTML = '<span class="kn" style="color:var(--text-dim);font-size:0.72rem;min-width:28px">#' + (d.index + 1) + '</span>'
+            + '<span class="amono"></span><span class="vmark ' + (ok ? "ok" : "bad") + '">' + (ok ? "✓ on node" : "✗ not on node") + '</span>';
+        row.querySelector(".amono").textContent = d.miniaddress;
+        box.appendChild(row);
+    });
+}
+
+/* ---------- destination picker ---------- */
+function renderBlockList() {
+    var box = document.getElementById("blockList");
+    box.innerHTML = "";
+    derived.block.forEach(function (d, i) {
+        var row = document.createElement("div");
+        row.className = "arow" + (i === 0 ? " sel" : "");
+        row.onclick = function () { selectDest(d, row); };
+        row.innerHTML = '<input type="radio" name="dest"' + (i === 0 ? " checked" : "") + '>'
+            + '<span class="kn">#' + (d.index + 1) + '</span><span class="amono"></span>'
+            + '<button class="copy" type="button">copy</button>';
+        row.querySelector(".amono").textContent = d.miniaddress;
+        row.querySelector(".copy").onclick = function (ev) {
+            ev.stopPropagation();
+            copyText(d.miniaddress, ev.target);
+        };
+        box.appendChild(row);
+    });
+    if (derived.block.length) selectDest(derived.block[0], box.firstChild);
+}
+function selectDest(d, row) {
+    destKey = d;
+    var box = document.getElementById("blockList");
+    Array.prototype.forEach.call(box.children, function (r) { r.classList.remove("sel"); r.querySelector("input").checked = false; });
+    row.classList.add("sel");
+    row.querySelector("input").checked = true;
+    document.getElementById("destIdx").textContent = "#" + (d.index + 1);
+    document.getElementById("destMx").textContent = d.miniaddress;
+    document.getElementById("destHex").textContent = d.address;
+}
+function copyText(text, btn) {
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
+        else { var t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select(); document.execCommand("copy"); document.body.removeChild(t); }
+        if (btn) { var old = btn.textContent; btn.textContent = "copied ✓"; setTimeout(function () { btn.textContent = old; }, 1300); }
+    } catch (e) { }
+}
+
+/* ---------- plan ---------- */
+function loadCoinsAndPlan() {
+    MDS.cmd("coins relevant:true", function (res) {
+        var coins = (res.status && Array.isArray(res.response)) ? res.response : [];
+        currentPlan = SweepPlan.plan(coins, ownSimple);
+        renderPlan();
+        document.getElementById("sweepCard").classList.remove("hidden");
+    });
+}
+
+function renderPlan() {
+    var p = currentPlan, box = document.getElementById("planBox");
+    if (!p || !p.jobs.length) {
+        box.innerHTML = '<div class="note">Nothing to sweep — this node holds no spendable coins.'
+            + (p && p.skipped.length ? "<br><br>Skipped:<br>" + p.skipped.map(esc).join("<br>") : "") + '</div>';
+        document.getElementById("sweepBtn").disabled = true;
+        document.getElementById("armChk").disabled = true;
+        return;
+    }
+    var html = '<table class="totals">';
+    p.totals.forEach(function (t) { html += "<tr><td>" + esc(t.label) + "</td><td>" + esc(t.value) + "</td></tr>"; });
+    html += '<tr><td>Transactions</td><td>' + p.jobs.length + '</td></tr>'
+          + '<tr><td>One-time signatures consumed</td><td>' + p.signatures + '</td></tr></table>';
+    if (p.skipped.length) {
+        html += '<details><summary>Skipping ' + p.skipped.length + ' coin(s)</summary><div class="note">'
+              + p.skipped.map(esc).join("<br>") + '</div></details>';
+    }
+    html += '<div class="note">Transactions are signed and broadcast one by one by this node '
+          + '(<code class="inl">txnsign publickey:auto</code>); nothing is called swept until the chain confirms '
+          + 'each coin\'s spend. A too-large batch is split and retried automatically; a failed transaction never '
+          + 'stops the rest.</div>';
+    box.innerHTML = html;
+    document.getElementById("armChk").disabled = false;
+    armChanged();
+}
+function armChanged() {
+    document.getElementById("sweepBtn").disabled =
+        sweeping || !verified || !currentPlan || !currentPlan.jobs.length || !document.getElementById("armChk").checked;
+}
+
+/* ---------- execute ---------- */
+function log(line) {
+    var el = document.getElementById("log");
+    el.classList.remove("hidden");
+    el.textContent += line + "\n";
+    el.scrollTop = el.scrollHeight;
+}
+function setSweepProg(done, total, label) {
+    document.getElementById("sweepProg").classList.remove("hidden");
+    document.getElementById("sweepBar").style.transform = "scaleX(" + (total ? done / total : 0) + ")";
+    document.getElementById("sweepLabel").textContent = label;
+}
+
+function executeSweep() {
+    if (sweeping || !verified || !destKey || !currentPlan || !currentPlan.jobs.length) return;
+    sweeping = true;
+    armChanged();
+    document.getElementById("log").textContent = "";
+    log("Sweeping to block-as-keyuses key #" + (destKey.index + 1));
+    log("  " + destKey.miniaddress);
+    log("  " + destKey.address);
+    var state = { jobs: currentPlan.jobs.slice(), i: 0, txpowids: [], sentCoinIds: [], failures: [] };
+    nextJob(state);
+}
+
+function nextJob(st) {
+    if (st.i >= st.jobs.length) { finishBroadcast(st); return; }
+    var job = st.jobs[st.i];
+    setSweepProg(st.i, st.jobs.length, job.label + "  (" + (st.i + 1) + " of " + st.jobs.length + ") — signing & broadcasting…");
+    runJob(job, function (ok, result) {
+        if (ok) {
+            job.coins.forEach(function (c) { st.sentCoinIds.push(c.coinid); });
+            st.txpowids.push(result);
+            log("✓ " + job.label + " → txpow " + result);
+        } else if (SweepPlan.isSizeRefusal(result) && !job.whole && job.coins.length > 1) {
+            log("⚠ " + job.label + " too large — splitting and retrying");
+            var halves = SweepPlan.split(job);
+            st.jobs.splice(st.i, 1, halves[0], halves[1]);
+            nextJob(st);
+            return;
+        } else {
+            st.failures.push(job.label + ": " + result);
+            log("✗ " + job.label + " FAILED: " + result + " (its coins stay on this node)");
+        }
+        st.i++;
+        nextJob(st);
+    });
+}
+
+/** Build, sign and post one job: txncreate → inputs → [state] → output → sign+post.
+ *  Every error path runs txndelete. cb(ok, txpowidOrError). */
+function runJob(job, cb) {
+    var id = "sweep" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
+    var steps = [];
+    steps.push("txncreate id:" + id);
+    job.coins.forEach(function (c) { steps.push("txninput id:" + id + " coinid:" + c.coinid); });
+    if (job.whole && job.states && job.states.length) {
+        for (var s = 0; s < job.states.length; s++) {
+            var sv = job.states[s];
+            if (String(sv.data).indexOf('"') >= 0) {   // unquotable — refuse honestly, don't mangle state
+                cb(false, "state port " + sv.port + " contains a double quote; sweep this coin manually");
+                return;
+            }
+            steps.push('txnstate id:' + id + ' port:' + sv.port + ' value:"' + sv.data + '"');
+        }
+    }
+    var sum = SweepPlan.jobSum(job);
+    steps.push("txnoutput id:" + id + " address:" + destKey.address + " amount:" + sum
+        + (job.tokenid !== "0x00" ? " tokenid:" + job.tokenid : ""));
+    steps.push("txnsign id:" + id + " publickey:auto txnpostauto:true txndelete:true");
+
+    var k = 0;
+    function run() {
+        MDS.cmd(steps[k], function (res) {
+            if (res.pending) { abort("command pending — WRITE permission required"); return; }
+            if (!res.status) { abort(res.error || "command failed: " + steps[k]); return; }
+            k++;
+            if (k >= steps.length) {
+                // success — txndelete:true already cleaned the txn row
+                var r = res.response || {};
+                var txpowid = (r.txpow && r.txpow.txpowid) ? r.txpow.txpowid : "(txpowid unavailable)";
+                cb(true, txpowid);
+                return;
+            }
+            run();
+        });
+    }
+    function abort(reason) {
+        // HARD RULE: every txn error path runs txndelete (harmless if the row never existed)
+        MDS.cmd("txndelete id:" + id, function () { cb(false, reason); });
+    }
+    run();
+}
+
+/* ---------- confirm on-chain: swept means CONFIRMED, not broadcast ---------- */
+var CONFIRM_POLL_MS = 20000, CONFIRM_MAX_POLLS = 45;   // ~15 minutes
+
+function finishBroadcast(st) {
+    setSweepProg(st.jobs.length, st.jobs.length, "Broadcast " + st.txpowids.length + " of " + st.jobs.length + " transaction(s)");
+    if (st.failures.length) log(st.failures.length + " transaction(s) failed — their coins stay safely on this node.");
+    if (!st.sentCoinIds.length) {
+        sweeping = false; armChanged();
+        report("warn", "Nothing broadcast", "Every transaction failed — all coins remain on this node. See the log above.");
+        loadCoinsAndPlan();
+        return;
+    }
+    confirmWatch = { remaining: st.sentCoinIds.slice(), total: st.sentCoinIds.length, txpowids: st.txpowids, polls: 0, timer: null };
+    log("Waiting for on-chain confirmation of " + confirmWatch.total + " coin spend(s)…");
+    pollConfirmations();
+    confirmWatch.timer = setInterval(pollConfirmations, CONFIRM_POLL_MS);
+}
+
+function pollConfirmations() {
+    var w = confirmWatch;
+    if (!w) return;
+    MDS.cmd("coins relevant:true", function (res) {
+        if (!confirmWatch) return;
+        if (res.status && Array.isArray(res.response)) {
+            var live = {};
+            res.response.forEach(function (c) { if (c.spent !== true) live[c.coinid] = true; });
+            w.remaining = w.remaining.filter(function (id) { return live[id]; });
+        }
+        var done = w.total - w.remaining.length;
+        setSweepProg(done, w.total, "Confirmed " + done + " of " + w.total + " coin(s) on-chain…");
+        if (!w.remaining.length) {
+            stopWatch();
+            sweeping = false; armChanged();
+            var ids = w.txpowids.map(esc).join("<br>");
+            report("ok", "Sweep complete — all " + w.total + " coin(s) confirmed on-chain ✓",
+                "Swept to block-as-keyuses key #" + (destKey.index + 1) + ":<br><code class=\"inl\">" + esc(destKey.miniaddress) + "</code><br>"
+                + "<code class=\"inl\">" + esc(destKey.address) + "</code><br><br>"
+                + "This node now shows the funds as gone — that is correct. To use them, run the same seed on a node "
+                + "started with <code class=\"inl\">-blockaskeyuses</code> (e.g. <code class=\"inl\">megammrsync action:resync</code> "
+                + "from a fresh -blockaskeyuses node with this phrase — no keyuses value needed, the block height handles it)."
+                + "<br><br>txpowids:<br>" + ids);
+            loadCoinsAndPlan();
+            return;
+        }
+        if (++w.polls >= CONFIRM_MAX_POLLS) {
+            stopWatch();
+            sweeping = false; armChanged();
+            report("warn", w.remaining.length + " coin(s) did not confirm within 15 minutes",
+                (w.total - w.remaining.length) + " of " + w.total + " confirmed. The unconfirmed transactions were "
+                + "likely lost before block inclusion — those coins are still on this node and safe to resend. "
+                + "Re-check the plan below and sweep again; only the remaining coins will move."
+                + "<br><br>txpowids so far:<br>" + w.txpowids.map(esc).join("<br>"));
+            loadCoinsAndPlan();
+        }
+    });
+}
+function stopWatch() {
+    if (confirmWatch && confirmWatch.timer) clearInterval(confirmWatch.timer);
+    confirmWatch = null;
+}
+function report(cls, title, bodyHtml) {
+    document.getElementById("confirmBox").innerHTML =
+        '<div class="verdict ' + cls + '" style="margin-top:14px"><h2>' + esc(title) + '</h2><p>' + bodyHtml + '</p></div>';
+}
+</script>
+</body>
+</html>
