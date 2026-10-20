@@ -1,0 +1,182 @@
+{
+  "communities": {
+    "0": [
+      "sweep_plan",
+      "sweep_plan_chunkinto",
+      "sweep_plan_coinamount",
+      "sweep_plan_decadd",
+      "sweep_plan_isminima",
+      "sweep_plan_issizerefusal",
+      "sweep_plan_jobsum",
+      "sweep_plan_normalizescript",
+      "sweep_plan_padend",
+      "sweep_plan_plan",
+      "sweep_plan_split",
+      "sweep_plan_stateentries",
+      "sweep_plan_test",
+      "sweep_plan_test_coin"
+    ],
+    "1": [
+      "derive",
+      "derive_bigintegertobytearray",
+      "derive_cleanseedphrase",
+      "derive_encode32",
+      "derive_fromhex",
+      "derive_gmssnextseed",
+      "derive_minimaaddress",
+      "derive_seedfromphrase",
+      "derive_setsha3",
+      "derive_sha3",
+      "derive_utf8bytes",
+      "derive_wotspublickey"
+    ],
+    "2": [
+      "mds",
+      "mds_base64toarraybuffer",
+      "mds_base64tohex",
+      "mds_getstatevariable",
+      "mds_hextobase64",
+      "mds_httppostasync",
+      "mds_httppostasyncpoll",
+      "mds_mdspostmessage",
+      "mds_polllistener",
+      "mds_postmdsfail",
+      "mds_recurseuploadmds"
+    ],
+    "3": [
+      "sha3",
+      "sha3_keccak",
+      "sha3_keccak_arraybuffer",
+      "sha3_keccak_bytepad",
+      "sha3_keccak_encode",
+      "sha3_keccak_encodestring",
+      "sha3_keccak_finalize",
+      "sha3_keccak_update",
+      "sha3_kmac",
+      "sha3_kmac_finalize"
+    ],
+    "4": [
+      "derive_hashconcat",
+      "derive_mmrleaf",
+      "derive_mmrparent",
+      "derive_mmrperfectroot",
+      "derive_serminidata",
+      "derive_sermininumber",
+      "derive_treekeypublickey"
+    ],
+    "5": [
+      "derive_addressfrompublickey",
+      "derive_deriveaddress",
+      "derive_modifierbytes",
+      "derive_privateseed",
+      "derive_tohexupper"
+    ],
+    "6": [
+      "derive_worker"
+    ],
+    "7": [
+      "wordlist"
+    ]
+  },
+  "cohesion": {
+    "0": 0.26373626373626374,
+    "1": 0.2878787878787879,
+    "2": 0.2727272727272727,
+    "3": 0.37777777777777777,
+    "4": 0.5714285714285714,
+    "5": 0.5,
+    "6": 1.0,
+    "7": 1.0
+  },
+  "gods": [
+    {
+      "id": "derive_treekeypublickey",
+      "label": "treeKeyPublicKey()",
+      "degree": 8
+    },
+    {
+      "id": "derive_addressfrompublickey",
+      "label": "addressFromPublicKey()",
+      "degree": 8
+    },
+    {
+      "id": "derive_hashconcat",
+      "label": "hashConcat()",
+      "degree": 7
+    },
+    {
+      "id": "sha3_keccak",
+      "label": "Keccak()",
+      "degree": 7
+    },
+    {
+      "id": "sweep_plan_plan",
+      "label": "plan()",
+      "degree": 7
+    },
+    {
+      "id": "derive_sha3",
+      "label": "SHA3()",
+      "degree": 6
+    },
+    {
+      "id": "derive_serminidata",
+      "label": "serMiniData()",
+      "degree": 6
+    },
+    {
+      "id": "derive_sermininumber",
+      "label": "serMiniNumber()",
+      "degree": 6
+    },
+    {
+      "id": "derive_mmrleaf",
+      "label": "mmrLeaf()",
+      "degree": 5
+    },
+    {
+      "id": "derive_mmrparent",
+      "label": "mmrParent()",
+      "degree": 5
+    }
+  ],
+  "surprises": [
+    {
+      "source": "hashConcat()",
+      "target": "SHA3()",
+      "source_files": [
+        "derive.js",
+        "derive.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 1 \u2192 community 4"
+    },
+    {
+      "source": "addressFromPublicKey()",
+      "target": "serMiniData()",
+      "source_files": [
+        "derive.js",
+        "derive.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 4 \u2192 community 5"
+    },
+    {
+      "source": "addressFromPublicKey()",
+      "target": "utf8Bytes()",
+      "source_files": [
+        "derive.js",
+        "derive.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 1 \u2192 community 5"
+    }
+  ],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}

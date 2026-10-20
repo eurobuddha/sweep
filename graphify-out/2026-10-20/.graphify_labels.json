@@ -1,0 +1,11 @@
+{
+  "0": "sweep-plan.js",
+  "1": "derive.js",
+  "2": "mds.js",
+  "3": "Keccak",
+  "4": "treeKeyPublicKey",
+  "5": "addressFromPublicKey",
+  "6": "derive.worker.js",
+  "7": "wordlist.js",
+  "8": "sweep-plan.test.js"
+}
