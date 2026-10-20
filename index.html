@@ -85,17 +85,36 @@
     <div class="badge">Minima · Key-scheme migration</div>
     <h1>Sweep <span class="v" id="ver"></span></h1>
     <p class="subtitle">
-        Derives this node's seed into <strong>both key schemes on-device</strong> — the classic
-        <strong>64 keys</strong> this node runs on, and the <strong>32 block-as-keyuses keys</strong> the same
-        seed produces on a <code class="inl">-blockaskeyuses</code> node — <strong>proves</strong> the classic set
-        byte-exact against this node's own wallet, then sweeps everything to one of the new keys in
-        <strong>one action</strong>. The seed never leaves this dapp.
+        Paste the <strong>Mx address</strong> you want to sweep to — it is validated with the
+        <strong>node's own decoder</strong> (format, 4-byte SHA3 checksum, byte-exact round-trip) before
+        anything can move — then every spendable coin on this node is swept to it in <strong>one action</strong>.
+        Advanced: derive the destination from this node's own seed to migrate to a
+        <code class="inl">-blockaskeyuses</code> node.
     </p>
 
-    <!-- 1 · Node & seed -->
+    <!-- 1 · Destination -->
     <div class="card">
-        <span class="section-label">1 · Node &amp; seed</span>
+        <span class="section-label">1 · Destination address</span>
         <div class="chips" id="nodeChips"><span class="chip dim">connecting…</span></div>
+        <textarea id="destInput" style="min-height:56px" placeholder="MxG08…  (paste the full Mx address everything will be swept to)" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
+        <button class="btn" id="validateBtn" onclick="validateAddress()" disabled>Validate address</button>
+        <div id="destResult"></div>
+        <button class="btn btn-sec" id="advToggle" onclick="toggleAdvanced()">Advanced — derive the destination from this node's seed instead</button>
+        <div class="status" id="statusBox"></div>
+        <div class="note">Before any sweep the address is checked three ways: <strong>Mx format</strong>, the node's
+        own decoder re-verifies the <strong>4-byte SHA3 checksum</strong> (<code class="inl">checkaddress</code>),
+        and this dapp recomputes the Mx form from the decoded 0x bytes and requires a <strong>byte-exact match</strong>.
+        The node checks the checksum again inside every transaction output. Sweeping needs <strong>WRITE</strong>
+        permission: <code class="inl">mds action:permission uid:&lt;this dapp's uid&gt; trust:write</code></div>
+    </div>
+
+    <!-- Advanced · derive from seed -->
+    <div class="card hidden" id="deriveCard">
+        <span class="section-label">Advanced · Derive destination from this node's seed</span>
+        <div class="note" style="margin:0 0 12px">For migrating to a <code class="inl">-blockaskeyuses</code> node
+        that runs on the <strong>same seed</strong>: derives both key schemes on-device (the classic 64 keys this
+        node runs on, and the 32 block-as-keyuses keys), proves the classic set byte-exact against this node's own
+        wallet, then lets you pick one of the new keys as the destination. The seed never leaves this dapp.</div>
         <button class="btn" id="deriveBtn" onclick="startDerive()" disabled>Read seed &amp; derive both key sets</button>
         <button class="btn btn-sec" id="phraseToggle" onclick="togglePhrase()">Type a seed phrase instead</button>
         <div id="phrasePanel" class="hidden" style="margin-top:12px">
@@ -106,24 +125,22 @@
             <div class="progress"><i id="progBar"></i></div>
             <div class="plabel" id="progLabel"></div>
         </div>
-        <div class="status" id="statusBox"></div>
         <div class="note">Derivation is ~96 hash-tree keys (~0.5–1M SHA3 each); a worker pool keeps the
-        UI alive. Needs <strong>WRITE</strong> permission (reads the vault seed, builds and posts transactions):
-        <code class="inl">mds action:permission uid:&lt;this dapp's uid&gt; trust:write</code></div>
+        UI alive. Reading the vault seed needs <strong>WRITE</strong> permission.</div>
     </div>
 
-    <!-- 2 · Verification -->
+    <!-- Advanced · Verification -->
     <div class="card hidden" id="verifyCard">
-        <span class="section-label">2 · Derivation proof</span>
+        <span class="section-label">Advanced · Derivation proof</span>
         <div id="verifyVerdict"></div>
         <details><summary>Show all 64 derived classic addresses</summary>
             <div class="addrlist" id="classicList"></div>
         </details>
     </div>
 
-    <!-- 3 · Destination -->
+    <!-- Advanced · Derived destination key -->
     <div class="card hidden" id="destCard">
-        <span class="section-label">3 · Destination key</span>
+        <span class="section-label">Advanced · Destination key</span>
         <div class="note" style="margin:0 0 12px">These addresses belong to <strong>your seed</strong> on a node started
         with <code class="inl">-blockaskeyuses</code> (minimaCore&nbsp;1.1.2.31+). Pick one — key&nbsp;#1 unless you
         have a reason. After the sweep, this classic node will show the funds as <strong>gone</strong>; they appear
@@ -131,15 +148,15 @@
         <div class="addrlist" id="blockList"></div>
     </div>
 
-    <!-- 4 · Sweep -->
+    <!-- 2 · Sweep -->
     <div class="card hidden" id="sweepCard">
-        <span class="section-label">4 · Sweep everything</span>
+        <span class="section-label">2 · Sweep everything</span>
         <div id="planBox"></div>
-        <div class="destbox"><label>Sweeping to key <span id="destIdx"></span></label>
+        <div class="destbox"><label>Sweeping to <span id="destIdx"></span></label>
             <code id="destMx"></code><code id="destHex" style="color:var(--text-dim);margin-top:4px"></code></div>
         <label class="chk" style="margin-top:14px"><input type="checkbox" id="armChk" onchange="armChanged()">
-            I understand this is <strong>&nbsp;irreversible&nbsp;</strong> and the funds will only be visible on a
-            <strong>&nbsp;-blockaskeyuses&nbsp;</strong> node restored from this same seed.</label>
+            <span id="armText">I understand this is <strong>&nbsp;irreversible&nbsp;</strong> and sweeps
+            <strong>&nbsp;every spendable coin on this node&nbsp;</strong> to the validated address above.</span></label>
         <button class="btn btn-danger" id="sweepBtn" style="margin-top:12px" onclick="executeSweep()" disabled>Sweep everything</button>
         <div id="sweepProg" class="hidden">
             <div class="progress"><i id="sweepBar"></i></div>
@@ -157,7 +174,7 @@
 <script src="derive.js"></script>
 <script src="sweep-plan.js"></script>
 <script>
-var VERSION = "0.1.0";
+var VERSION = "0.2.0";
 document.getElementById("ver").textContent = "v" + VERSION;
 document.getElementById("verF").textContent = VERSION;
 
@@ -166,7 +183,8 @@ var derived = { classic: [], block: [] };   // {index, address(0x), miniaddress,
 var ownSimple = {};                          // UPPER(0x) -> true : addresses txnsign auto covers
 var nodeDefaults = [];                       // node's default simple 0x addresses (UPPER)
 var verified = false;
-var destKey = null;                          // selected block key object
+var destKey = null;                          // pasted: {pasted:true, miniaddress, address, relevant} · derived: block key object
+var destMode = null;                         // "pasted" | "derived"
 var currentPlan = null;
 var sweeping = false;
 var confirmWatch = null;                     // { remaining:[], total, txpowids:[], dest, polls }
@@ -175,11 +193,12 @@ var confirmWatch = null;                     // { remaining:[], total, txpowids:
 MDS.init(function (msg) {
     if (msg.event === "inited") {
         INITED = true;
+        document.getElementById("validateBtn").disabled = false;
         MDS.cmd("checkmode", function (res) {
             MODE_WRITE = !!(res.status && res.response && (res.response.mode === "WRITE" || res.response.writemode === true));
             renderChips();
             document.getElementById("deriveBtn").disabled = !MODE_WRITE;
-            if (!MODE_WRITE) showError("This dapp has READ permission only. Give it WRITE in the terminal: mds action:permission uid:<uid> trust:write — then reopen. (You can still derive from a typed phrase, but sweeping needs WRITE.)");
+            if (!MODE_WRITE) showError("This dapp has READ permission only. Give it WRITE in the terminal: mds action:permission uid:<uid> trust:write — then reopen. (You can still validate an address or derive from a typed phrase, but sweeping needs WRITE.)");
         });
     } else if (msg.event === "NEWBLOCK") {
         if (confirmWatch) pollConfirmations();
@@ -217,6 +236,88 @@ function togglePhrase() {
     document.getElementById("deriveBtn").disabled = busy || (!MODE_WRITE && !phraseOpen());
 }
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function mxDeps() { return { fromHex: KeyUsesDerive._fromHex, encode32: KeyUsesDerive._encode32, sha3: sha3_256 }; }
+
+/* ---------- simple path: paste + validate destination ---------- */
+function toggleAdvanced() {
+    var c = document.getElementById("deriveCard");
+    c.classList.toggle("hidden");
+    document.getElementById("advToggle").textContent = c.classList.contains("hidden")
+        ? "Advanced — derive the destination from this node's seed instead"
+        : "Hide the seed-derivation path";
+}
+
+function validateAddress() {
+    if (sweeping) return;   // destination is frozen once a sweep is running
+    var box = document.getElementById("destResult");
+    function fail(m) {
+        box.innerHTML = '<div class="verdict risk" style="margin:12px 0"><h2>✗ Not a valid destination</h2><p>'
+            + esc(m) + '<br>Nothing can be swept to it.</p></div>';
+    }
+    var raw = document.getElementById("destInput").value.replace(/\s+/g, "");
+    if (!raw) { fail("Paste the destination address first."); return; }
+    if (/^0x/i.test(raw)) { fail("Only the Mx form is accepted — paste the Mx address, not the 0x form, so the checksum can be verified."); return; }
+    var addr = /^mx/i.test(raw) ? "Mx" + raw.slice(2).toUpperCase() : raw;
+    if (!SweepPlan.MX_RE.test(addr)) {
+        fail("Not a well-formed Mx address — check for missing or mistyped characters (a real Mx address never contains I, L, O or X after the Mx prefix).");
+        return;
+    }
+    var btn = document.getElementById("validateBtn");
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Validating with the node…';
+    MDS.cmd("checkaddress address:" + addr, function (res) {
+        btn.disabled = false; btn.textContent = "Validate address";
+        if (!res || !res.status || !res.response) {
+            fail("The node refused this address: " + ((res && res.error) || "no response") +
+                 " — the checksum does not verify, so this string was never a real Minima address.");
+            return;
+        }
+        var r = res.response, hex = String(r["0x"] || "");
+        if (String(r.Mx) !== addr) {
+            fail("The node decodes this string to a DIFFERENT address (" + String(r.Mx) + ") — refusing it.");
+            return;
+        }
+        // defense in depth: recompute the Mx form locally from the decoded 0x bytes
+        var cand = { pasted: true, miniaddress: addr, address: hex, relevant: r.relevant === true };
+        var err = SweepPlan.validatePastedDestination(cand, mxDeps());
+        if (err) { fail(err); return; }
+        destKey = cand; destMode = "pasted";
+        var ownNote = cand.relevant
+            ? '<br><br>⚠ This address belongs to <strong>this node\'s own wallet</strong> — the sweep would send the funds straight back to this node. Only continue if that is what you want (e.g. consolidating).'
+            : '';
+        box.innerHTML = '<div class="verdict ok" style="margin:12px 0"><h2>✓ Valid Minima address</h2>'
+            + '<p>Checksum verified by the node and re-computed locally, byte-exact.'
+            + '<br><code class="inl">' + esc(addr) + '</code>'
+            + '<br><code class="inl">' + esc(hex) + '</code>' + ownNote + '</p></div>';
+        setDestBox();
+        loadOwnKeys(function () { loadCoinsAndPlan(); });
+    });
+}
+
+function setDestBox() {
+    document.getElementById("destIdx").textContent = destMode === "pasted"
+        ? "pasted address (validated ✓)"
+        : "block-as-keyuses key #" + (destKey.index + 1);
+    document.getElementById("destMx").textContent = destKey.miniaddress;
+    document.getElementById("destHex").textContent = destKey.address;
+    document.getElementById("armText").innerHTML = destMode === "pasted"
+        ? 'I understand this is <strong>&nbsp;irreversible&nbsp;</strong> and sweeps <strong>&nbsp;every spendable coin on this node&nbsp;</strong> to the validated address above.'
+        : 'I understand this is <strong>&nbsp;irreversible&nbsp;</strong> and the funds will only be visible on a <strong>&nbsp;-blockaskeyuses&nbsp;</strong> node restored from this same seed.';
+}
+
+/* scripts → which addresses this node can auto-sign (shared by both paths) */
+function loadOwnKeys(cb) {
+    MDS.cmd("scripts", function (res) {
+        var rows = (res.status && Array.isArray(res.response)) ? res.response : [];
+        ownSimple = {}; nodeDefaults = [];
+        rows.forEach(function (r) {
+            if (r.simple === true) {
+                ownSimple[String(r.address).toUpperCase()] = true;
+                if (r["default"] === true) nodeDefaults.push(String(r.address).toUpperCase());
+            }
+        });
+        cb();
+    });
+}
 
 /* ---------- derive ---------- */
 function startDerive() {
@@ -306,16 +407,8 @@ function deriveAll(seedHex, jobs, done) {
 /* ---------- verification gate: derived classic 64 ⟷ node's own wallet ---------- */
 function verifyAgainstNode() {
     setProg(96, 96, "Checking against this node's wallet …");
-    MDS.cmd("scripts", function (res) {
+    loadOwnKeys(function () {
         setBusy(false);
-        var rows = (res.status && Array.isArray(res.response)) ? res.response : [];
-        ownSimple = {}; nodeDefaults = [];
-        rows.forEach(function (r) {
-            if (r.simple === true) {
-                ownSimple[String(r.address).toUpperCase()] = true;
-                if (r["default"] === true) nodeDefaults.push(String(r.address).toUpperCase());
-            }
-        });
         var classicSet = {}, blockSet = {};
         derived.classic.forEach(function (d) { classicSet[d.address.toUpperCase()] = true; });
         derived.block.forEach(function (d) { blockSet[d.address.toUpperCase()] = true; });
@@ -373,10 +466,11 @@ function renderBlockList() {
     var box = document.getElementById("blockList");
     box.innerHTML = "";
     derived.block.forEach(function (d, i) {
+        var preselect = i === 0 && destMode !== "pasted";
         var row = document.createElement("div");
-        row.className = "arow" + (i === 0 ? " sel" : "");
+        row.className = "arow" + (preselect ? " sel" : "");
         row.onclick = function () { selectDest(d, row); };
-        row.innerHTML = '<input type="radio" name="dest"' + (i === 0 ? " checked" : "") + '>'
+        row.innerHTML = '<input type="radio" name="dest"' + (preselect ? " checked" : "") + '>'
             + '<span class="kn">#' + (d.index + 1) + '</span><span class="amono"></span>'
             + '<button class="copy" type="button">copy</button>';
         row.querySelector(".amono").textContent = d.miniaddress;
@@ -386,18 +480,19 @@ function renderBlockList() {
         };
         box.appendChild(row);
     });
-    if (derived.block.length) selectDest(derived.block[0], box.firstChild);
+    // Don't steal a destination the user already validated by pasting — a derived key
+    // only becomes the destination when they click it.
+    if (derived.block.length && destMode !== "pasted") selectDest(derived.block[0], box.firstChild);
 }
 function selectDest(d, row) {
     if (sweeping) return;   // destination is frozen once a sweep is running
-    destKey = d;
+    destKey = d; destMode = "derived";
     var box = document.getElementById("blockList");
     Array.prototype.forEach.call(box.children, function (r) { r.classList.remove("sel"); r.querySelector("input").checked = false; });
     row.classList.add("sel");
     row.querySelector("input").checked = true;
-    document.getElementById("destIdx").textContent = "#" + (d.index + 1);
-    document.getElementById("destMx").textContent = d.miniaddress;
-    document.getElementById("destHex").textContent = d.address;
+    setDestBox();
+    armChanged();
 }
 function copyText(text, btn) {
     try {
@@ -446,9 +541,14 @@ function renderPlan() {
     document.getElementById("armChk").disabled = false;
     armChanged();
 }
+function destReady() {
+    if (destMode === "pasted") return !!(destKey && destKey.pasted === true);
+    if (destMode === "derived") return verified && !!destKey;
+    return false;
+}
 function armChanged() {
     document.getElementById("sweepBtn").disabled =
-        sweeping || !verified || !currentPlan || !currentPlan.jobs.length || !document.getElementById("armChk").checked;
+        sweeping || !MODE_WRITE || !destReady() || !currentPlan || !currentPlan.jobs.length || !document.getElementById("armChk").checked;
 }
 
 /* ---------- execute ---------- */
@@ -465,21 +565,26 @@ function setSweepProg(done, total, label) {
 }
 
 function executeSweep() {
-    if (sweeping || !verified || !destKey || !currentPlan || !currentPlan.jobs.length) return;
+    if (sweeping || !destReady() || !currentPlan || !currentPlan.jobs.length) return;
     document.getElementById("log").textContent = "";
-    // Hard gate (SweepPlan.validateDestination): Mx-only format, checksum matches the
-    // 0x form, and the key EXISTS in the derived block-as-keyuses set — or no sweep.
-    var destErr = SweepPlan.validateDestination(destKey, derived.block,
-        { fromHex: KeyUsesDerive._fromHex, encode32: KeyUsesDerive._encode32, sha3: sha3_256 });
+    // Hard gate: Mx-only format + checksum matches the 0x form, and (derived path only)
+    // the key EXISTS in the derived block-as-keyuses set — or no sweep.
+    var destErr = destMode === "pasted"
+        ? SweepPlan.validatePastedDestination(destKey, mxDeps())
+        : SweepPlan.validateDestination(destKey, derived.block, mxDeps());
     if (destErr) {
         log("SWEEP REFUSED — " + destErr);
-        log("Nothing was sent. Re-run the derivation and pick the destination again.");
+        log("Nothing was sent. " + (destMode === "pasted"
+            ? "Validate the destination address again."
+            : "Re-run the derivation and pick the destination again."));
         return;
     }
     sweeping = true;
     armChanged();
-    log("Destination Mx checksum verified and key exists in the derived set ✓");
-    log("Sweeping to block-as-keyuses key #" + (destKey.index + 1));
+    log(destMode === "pasted"
+        ? "Destination Mx checksum verified (node + local recompute) ✓"
+        : "Destination Mx checksum verified and key exists in the derived set ✓");
+    log("Sweeping to " + (destMode === "pasted" ? "pasted address" : "block-as-keyuses key #" + (destKey.index + 1)));
     log("  " + destKey.miniaddress);
     log("  " + destKey.address);
     var state = { jobs: currentPlan.jobs.slice(), i: 0, txpowids: [], sentCoinIds: [], failures: [] };
@@ -615,13 +720,17 @@ function pollConfirmations() {
             stopWatch();
             sweeping = false; armChanged();
             var ids = w.txpowids.map(esc).join("<br>");
+            var where = destMode === "pasted"
+                ? "Swept to:<br><code class=\"inl\">" + esc(destKey.miniaddress) + "</code><br>"
+                  + "<code class=\"inl\">" + esc(destKey.address) + "</code><br><br>"
+                  + "This node now shows the funds as gone — that is correct; they are at the address above."
+                : "Swept to block-as-keyuses key #" + (destKey.index + 1) + ":<br><code class=\"inl\">" + esc(destKey.miniaddress) + "</code><br>"
+                  + "<code class=\"inl\">" + esc(destKey.address) + "</code><br><br>"
+                  + "This node now shows the funds as gone — that is correct. To use them, run the same seed on a node "
+                  + "started with <code class=\"inl\">-blockaskeyuses</code> (e.g. <code class=\"inl\">megammrsync action:resync</code> "
+                  + "from a fresh -blockaskeyuses node with this phrase — no keyuses value needed, the block height handles it).";
             report("ok", "Sweep complete — all " + w.total + " coin(s) confirmed on-chain ✓",
-                "Swept to block-as-keyuses key #" + (destKey.index + 1) + ":<br><code class=\"inl\">" + esc(destKey.miniaddress) + "</code><br>"
-                + "<code class=\"inl\">" + esc(destKey.address) + "</code><br><br>"
-                + "This node now shows the funds as gone — that is correct. To use them, run the same seed on a node "
-                + "started with <code class=\"inl\">-blockaskeyuses</code> (e.g. <code class=\"inl\">megammrsync action:resync</code> "
-                + "from a fresh -blockaskeyuses node with this phrase — no keyuses value needed, the block height handles it)."
-                + "<br><br>txpowids:<br>" + ids);
+                where + "<br><br>txpowids:<br>" + ids);
             loadCoinsAndPlan();
             return;
         }

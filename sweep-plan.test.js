@@ -106,6 +106,21 @@ assert.ok(/not one of this seed/.test(P.validateDestination(
 assert.ok(/not one of this seed/.test(P.validateDestination(goodDest, [], mxDeps)));            // empty set refused
 assert.ok(P.validateDestination(null, blockSet, mxDeps) !== null);                              // no destination refused
 
+// validatePastedDestination (simple path): pasted flag + Mx format + 32-byte 0x + checksum
+// round-trip — no derived-set requirement (existence is attested by the node's checkaddress).
+var pastedGood = { pasted: true, address: goodDest.address, miniaddress: goodDest.miniaddress };
+assert.strictEqual(P.validatePastedDestination(pastedGood, mxDeps), null);
+assert.ok(/has not been validated/.test(P.validatePastedDestination(
+  { address: goodDest.address, miniaddress: goodDest.miniaddress }, mxDeps)));                  // pasted flag missing
+assert.ok(/not a well-formed Mx/.test(P.validatePastedDestination(
+  { pasted: true, address: goodDest.address, miniaddress: goodDest.address }, mxDeps)));        // 0x form refused
+assert.ok(/32-byte/.test(P.validatePastedDestination(
+  { pasted: true, address: "0xC2585B", miniaddress: goodDest.miniaddress }, mxDeps)));          // short 0x refused
+assert.ok(/checksum does not match/.test(P.validatePastedDestination(
+  { pasted: true, address: "0xC2585B2A52C6FF475D28C901D31E482FE0071872E5C2229A8E6E23422D471FC3",
+    miniaddress: goodDest.miniaddress }, mxDeps)));                                             // wrong hex refused
+assert.ok(P.validatePastedDestination(null, mxDeps) !== null);                                  // no destination refused
+
 // size-aware chunking (ported from SweepFlow 0.2.23): a fat coin forces a byte-budget flush
 function fatCoin(id, addr, stateBytes) {
   var c = coin(id, addr, "1");

@@ -237,6 +237,28 @@
     return null;
   }
 
+  /** Hard gate for a PASTED destination (simple path, no derivation): well-formed Mx,
+      a 32-byte 0x form, and the Mx recomputed from that 0x must match the pasted string
+      byte-exact (checksum proof). d.pasted === true is set only after the node's own
+      checkaddress accepted the string; the node re-verifies the checksum once more
+      inside txnoutput (convertMinimaAddress). Returns null when valid. */
+  function validatePastedDestination(d, deps) {
+    if (!d || d.pasted !== true)
+      return "destination has not been validated — paste the address and press Validate";
+    if (typeof d.miniaddress !== "string" || !MX_RE.test(d.miniaddress))
+      return "destination is not a well-formed Mx address";
+    if (typeof d.address !== "string" || !/^0x[0-9A-F]{64}$/.test(d.address))
+      return "destination did not decode to a 32-byte address (0x form: " + d.address + ")";
+    try {
+      if (mxFromHex(d.address, deps) !== d.miniaddress)
+        return "Mx checksum does not match the destination address " + d.miniaddress
+             + " (0x form: " + d.address + ")";
+    } catch (e) {
+      return "Mx checksum could not be verified: " + String(e && e.message || e);
+    }
+    return null;
+  }
+
   root.SweepPlan = {
     MAX_INPUTS_PER_TXN: MAX_INPUTS_PER_TXN,
     MAX_KEYS_PER_TXN: MAX_KEYS_PER_TXN,
@@ -252,7 +274,8 @@
     isSizeRefusal: isSizeRefusal,
     MX_RE: MX_RE,
     mxFromHex: mxFromHex,
-    validateDestination: validateDestination
+    validateDestination: validateDestination,
+    validatePastedDestination: validatePastedDestination
   };
   if (typeof module !== "undefined" && module.exports) module.exports = root.SweepPlan;
 
