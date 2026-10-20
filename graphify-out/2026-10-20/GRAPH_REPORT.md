@@ -1,16 +1,16 @@
-# Graph Report - sweep  (2026-10-19)
+# Graph Report - sweep  (2026-10-20)
 
 ## Corpus Check
-- 8 files · ~14,736 words
+- 8 files · ~15,844 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 66 nodes · 125 edges · 9 communities (7 shown, 2 thin omitted)
+- 67 nodes · 127 edges · 9 communities (7 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6e7cc8c1`
+- Built from commit: `c8d6e0b4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -49,8 +49,8 @@
 ## Communities (9 total, 2 thin omitted)
 
 ### Community 0 - "sweep-plan.js"
-Cohesion: 0.27
-Nodes (13): chunkInto(), coinAmount(), decAdd(), isMinima(), jobSum(), mxFromHex(), normalizeScript(), padEnd() (+5 more)
+Cohesion: 0.25
+Nodes (14): chunkInto(), coinAmount(), decAdd(), isMinima(), jobSum(), mxFromHex(), normalizeScript(), padEnd() (+6 more)
 
 ### Community 1 - "derive.js"
 Cohesion: 0.29

@@ -4,15 +4,114 @@
   "graph": {},
   "nodes": [
     {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "readme",
+      "community": 9,
+      "community_name": "Sweep \u2014 sweep everything on this node to one validated Mx address",
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "Sweep \u2014 sweep everything on this node to one validated Mx address",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "readme_sweep_sweep_everything_on_this_node_to_one_validated_mx_address",
+      "community": 9,
+      "community_name": "Sweep \u2014 sweep everything on this node to one validated Mx address",
+      "norm_label": "sweep \u2014 sweep everything on this node to one validated mx address"
+    },
+    {
+      "label": "Simple path (default)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "readme_simple_path_default",
+      "community": 9,
+      "community_name": "Sweep \u2014 sweep everything on this node to one validated Mx address",
+      "norm_label": "simple path (default)"
+    },
+    {
+      "label": "Advanced path \u2014 migrate to block-as-keyuses",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "readme_advanced_path_migrate_to_block_as_keyuses",
+      "community": 9,
+      "community_name": "Sweep \u2014 sweep everything on this node to one validated Mx address",
+      "norm_label": "advanced path \u2014 migrate to block-as-keyuses"
+    },
+    {
+      "label": "The sweep engine (both paths)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L46",
+      "_origin": "ast",
+      "id": "readme_the_sweep_engine_both_paths",
+      "community": 9,
+      "community_name": "Sweep \u2014 sweep everything on this node to one validated Mx address",
+      "norm_label": "the sweep engine (both paths)"
+    },
+    {
+      "label": "Install",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L65",
+      "_origin": "ast",
+      "id": "readme_install",
+      "community": 9,
+      "community_name": "Sweep \u2014 sweep everything on this node to one validated Mx address",
+      "norm_label": "install"
+    },
+    {
+      "label": "Files",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L74",
+      "_origin": "ast",
+      "id": "readme_files",
+      "community": 9,
+      "community_name": "Sweep \u2014 sweep everything on this node to one validated Mx address",
+      "norm_label": "files"
+    },
+    {
+      "label": "Package",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L86",
+      "_origin": "ast",
+      "id": "readme_package",
+      "community": 9,
+      "community_name": "Sweep \u2014 sweep everything on this node to one validated Mx address",
+      "norm_label": "package"
+    },
+    {
+      "label": "Validation log",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L92",
+      "_origin": "ast",
+      "id": "readme_validation_log",
+      "community": 9,
+      "community_name": "Sweep \u2014 sweep everything on this node to one validated Mx address",
+      "norm_label": "validation log"
+    },
+    {
       "label": "sweep-plan.js",
       "file_type": "code",
       "source_file": "sweep-plan.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "sweep_plan",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "sweep-plan.js"
+      "norm_label": "sweep-plan.js",
+      "id": "sweep_plan"
     },
     {
       "label": "sizeOf()",
@@ -21,10 +120,10 @@
       "source_location": "L26",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_sizeof",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "sizeof()"
+      "norm_label": "sizeof()",
+      "id": "sweep_plan_sizeof"
     },
     {
       "label": "decAdd()",
@@ -33,10 +132,10 @@
       "source_location": "L33",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_decadd",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "decadd()"
+      "norm_label": "decadd()",
+      "id": "sweep_plan_decadd"
     },
     {
       "label": "padEnd()",
@@ -45,10 +144,10 @@
       "source_location": "L45",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_padend",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "padend()"
+      "norm_label": "padend()",
+      "id": "sweep_plan_padend"
     },
     {
       "label": "normalizeScript()",
@@ -57,10 +156,10 @@
       "source_location": "L47",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_normalizescript",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "normalizescript()"
+      "norm_label": "normalizescript()",
+      "id": "sweep_plan_normalizescript"
     },
     {
       "label": "isMinima()",
@@ -69,10 +168,10 @@
       "source_location": "L51",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_isminima",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "isminima()"
+      "norm_label": "isminima()",
+      "id": "sweep_plan_isminima"
     },
     {
       "label": "coinAmount()",
@@ -81,10 +180,10 @@
       "source_location": "L54",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_coinamount",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "coinamount()"
+      "norm_label": "coinamount()",
+      "id": "sweep_plan_coinamount"
     },
     {
       "label": "stateEntries()",
@@ -93,10 +192,10 @@
       "source_location": "L60",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_stateentries",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "stateentries()"
+      "norm_label": "stateentries()",
+      "id": "sweep_plan_stateentries"
     },
     {
       "label": "plan()",
@@ -105,10 +204,10 @@
       "source_location": "L78",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_plan",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "plan()"
+      "norm_label": "plan()",
+      "id": "sweep_plan_plan"
     },
     {
       "label": "chunkInto()",
@@ -117,10 +216,10 @@
       "source_location": "L155",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_chunkinto",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "chunkinto()"
+      "norm_label": "chunkinto()",
+      "id": "sweep_plan_chunkinto"
     },
     {
       "label": "jobSum()",
@@ -129,10 +228,10 @@
       "source_location": "L186",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_jobsum",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "jobsum()"
+      "norm_label": "jobsum()",
+      "id": "sweep_plan_jobsum"
     },
     {
       "label": "split()",
@@ -141,10 +240,10 @@
       "source_location": "L193",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_split",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "split()"
+      "norm_label": "split()",
+      "id": "sweep_plan_split"
     },
     {
       "label": "isSizeRefusal()",
@@ -153,10 +252,10 @@
       "source_location": "L201",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_issizerefusal",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "issizerefusal()"
+      "norm_label": "issizerefusal()",
+      "id": "sweep_plan_issizerefusal"
     },
     {
       "label": "mxFromHex()",
@@ -165,10 +264,10 @@
       "source_location": "L214",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_mxfromhex",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "mxfromhex()"
+      "norm_label": "mxfromhex()",
+      "id": "sweep_plan_mxfromhex"
     },
     {
       "label": "validateDestination()",
@@ -177,10 +276,10 @@
       "source_location": "L223",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_validatedestination",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "validatedestination()"
+      "norm_label": "validatedestination()",
+      "id": "sweep_plan_validatedestination"
     },
     {
       "label": "validatePastedDestination()",
@@ -189,10 +288,10 @@
       "source_location": "L245",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_validatepasteddestination",
       "community": 0,
       "community_name": "sweep-plan.js",
-      "norm_label": "validatepasteddestination()"
+      "norm_label": "validatepasteddestination()",
+      "id": "sweep_plan_validatepasteddestination"
     },
     {
       "label": "sweep-plan.test.js",
@@ -200,10 +299,10 @@
       "source_file": "sweep-plan.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "sweep_plan_test",
       "community": 8,
       "community_name": "sweep-plan.test.js",
-      "norm_label": "sweep-plan.test.js"
+      "norm_label": "sweep-plan.test.js",
+      "id": "sweep_plan_test"
     },
     {
       "label": "coin()",
@@ -212,10 +311,10 @@
       "source_location": "L24",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_test_coin",
       "community": 8,
       "community_name": "sweep-plan.test.js",
-      "norm_label": "coin()"
+      "norm_label": "coin()",
+      "id": "sweep_plan_test_coin"
     },
     {
       "label": "fatCoin()",
@@ -224,10 +323,10 @@
       "source_location": "L125",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_test_fatcoin",
       "community": 8,
       "community_name": "sweep-plan.test.js",
-      "norm_label": "fatcoin()"
+      "norm_label": "fatcoin()",
+      "id": "sweep_plan_test_fatcoin"
     },
     {
       "label": "harness()",
@@ -236,10 +335,10 @@
       "source_location": "L164",
       "_callable": true,
       "_origin": "ast",
-      "id": "sweep_plan_test_harness",
       "community": 8,
       "community_name": "sweep-plan.test.js",
-      "norm_label": "harness()"
+      "norm_label": "harness()",
+      "id": "sweep_plan_test_harness"
     },
     {
       "label": "derive.js",
@@ -805,13 +904,101 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme",
+      "target": "readme_sweep_sweep_everything_on_this_node_to_one_validated_mx_address",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme_sweep_sweep_everything_on_this_node_to_one_validated_mx_address",
+      "target": "readme_advanced_path_migrate_to_block_as_keyuses",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme_sweep_sweep_everything_on_this_node_to_one_validated_mx_address",
+      "target": "readme_files",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme_sweep_sweep_everything_on_this_node_to_one_validated_mx_address",
+      "target": "readme_install",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L86",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme_sweep_sweep_everything_on_this_node_to_one_validated_mx_address",
+      "target": "readme_package",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme_sweep_sweep_everything_on_this_node_to_one_validated_mx_address",
+      "target": "readme_simple_path_default",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme_sweep_sweep_everything_on_this_node_to_one_validated_mx_address",
+      "target": "readme_the_sweep_engine_both_paths",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme_sweep_sweep_everything_on_this_node_to_one_validated_mx_address",
+      "target": "readme_validation_log",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "sweep-plan.js",
       "source_location": "L155",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_chunkinto",
-      "confidence_score": 1.0
+      "target": "sweep_plan_chunkinto"
     },
     {
       "relation": "contains",
@@ -820,9 +1007,9 @@
       "source_location": "L54",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_coinamount",
-      "confidence_score": 1.0
+      "target": "sweep_plan_coinamount"
     },
     {
       "relation": "contains",
@@ -831,9 +1018,9 @@
       "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_decadd",
-      "confidence_score": 1.0
+      "target": "sweep_plan_decadd"
     },
     {
       "relation": "contains",
@@ -842,9 +1029,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_isminima",
-      "confidence_score": 1.0
+      "target": "sweep_plan_isminima"
     },
     {
       "relation": "contains",
@@ -853,9 +1040,9 @@
       "source_location": "L201",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_issizerefusal",
-      "confidence_score": 1.0
+      "target": "sweep_plan_issizerefusal"
     },
     {
       "relation": "contains",
@@ -864,9 +1051,9 @@
       "source_location": "L186",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_jobsum",
-      "confidence_score": 1.0
+      "target": "sweep_plan_jobsum"
     },
     {
       "relation": "contains",
@@ -875,9 +1062,9 @@
       "source_location": "L214",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_mxfromhex",
-      "confidence_score": 1.0
+      "target": "sweep_plan_mxfromhex"
     },
     {
       "relation": "contains",
@@ -886,9 +1073,9 @@
       "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_normalizescript",
-      "confidence_score": 1.0
+      "target": "sweep_plan_normalizescript"
     },
     {
       "relation": "contains",
@@ -897,9 +1084,9 @@
       "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_padend",
-      "confidence_score": 1.0
+      "target": "sweep_plan_padend"
     },
     {
       "relation": "contains",
@@ -908,9 +1095,9 @@
       "source_location": "L78",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_plan",
-      "confidence_score": 1.0
+      "target": "sweep_plan_plan"
     },
     {
       "relation": "contains",
@@ -919,9 +1106,9 @@
       "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_sizeof",
-      "confidence_score": 1.0
+      "target": "sweep_plan_sizeof"
     },
     {
       "relation": "contains",
@@ -930,9 +1117,9 @@
       "source_location": "L193",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_split",
-      "confidence_score": 1.0
+      "target": "sweep_plan_split"
     },
     {
       "relation": "contains",
@@ -941,9 +1128,9 @@
       "source_location": "L60",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_stateentries",
-      "confidence_score": 1.0
+      "target": "sweep_plan_stateentries"
     },
     {
       "relation": "contains",
@@ -952,9 +1139,9 @@
       "source_location": "L223",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_validatedestination",
-      "confidence_score": 1.0
+      "target": "sweep_plan_validatedestination"
     },
     {
       "relation": "contains",
@@ -963,9 +1150,9 @@
       "source_location": "L245",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan",
-      "target": "sweep_plan_validatepasteddestination",
-      "confidence_score": 1.0
+      "target": "sweep_plan_validatepasteddestination"
     },
     {
       "relation": "imports_from",
@@ -975,9 +1162,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_test",
-      "target": "sweep_plan",
-      "confidence_score": 1.0
+      "target": "sweep_plan"
     },
     {
       "relation": "calls",
@@ -987,9 +1174,9 @@
       "source_location": "L169",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_chunkinto",
-      "target": "sweep_plan_sizeof",
-      "confidence_score": 1.0
+      "target": "sweep_plan_sizeof"
     },
     {
       "relation": "calls",
@@ -999,9 +1186,9 @@
       "source_location": "L116",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_plan",
-      "target": "sweep_plan_sizeof",
-      "confidence_score": 1.0
+      "target": "sweep_plan_sizeof"
     },
     {
       "relation": "calls",
@@ -1011,9 +1198,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_decadd",
-      "target": "sweep_plan_padend",
-      "confidence_score": 1.0
+      "target": "sweep_plan_padend"
     },
     {
       "relation": "calls",
@@ -1023,9 +1210,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_decadd",
-      "target": "sweep_plan_split",
-      "confidence_score": 1.0
+      "target": "sweep_plan_split"
     },
     {
       "relation": "calls",
@@ -1035,9 +1222,9 @@
       "source_location": "L188",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_jobsum",
-      "target": "sweep_plan_decadd",
-      "confidence_score": 1.0
+      "target": "sweep_plan_decadd"
     },
     {
       "relation": "calls",
@@ -1047,9 +1234,9 @@
       "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_plan",
-      "target": "sweep_plan_decadd",
-      "confidence_score": 1.0
+      "target": "sweep_plan_decadd"
     },
     {
       "relation": "calls",
@@ -1059,9 +1246,9 @@
       "source_location": "L100",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_plan",
-      "target": "sweep_plan_normalizescript",
-      "confidence_score": 1.0
+      "target": "sweep_plan_normalizescript"
     },
     {
       "relation": "calls",
@@ -1071,9 +1258,9 @@
       "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_coinamount",
-      "target": "sweep_plan_isminima",
-      "confidence_score": 1.0
+      "target": "sweep_plan_isminima"
     },
     {
       "relation": "calls",
@@ -1083,9 +1270,9 @@
       "source_location": "L92",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_plan",
-      "target": "sweep_plan_isminima",
-      "confidence_score": 1.0
+      "target": "sweep_plan_isminima"
     },
     {
       "relation": "calls",
@@ -1095,9 +1282,9 @@
       "source_location": "L188",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_jobsum",
-      "target": "sweep_plan_coinamount",
-      "confidence_score": 1.0
+      "target": "sweep_plan_coinamount"
     },
     {
       "relation": "calls",
@@ -1107,9 +1294,9 @@
       "source_location": "L107",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_plan",
-      "target": "sweep_plan_coinamount",
-      "confidence_score": 1.0
+      "target": "sweep_plan_coinamount"
     },
     {
       "relation": "calls",
@@ -1119,9 +1306,9 @@
       "source_location": "L99",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_plan",
-      "target": "sweep_plan_stateentries",
-      "confidence_score": 1.0
+      "target": "sweep_plan_stateentries"
     },
     {
       "relation": "calls",
@@ -1131,9 +1318,9 @@
       "source_location": "L137",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_plan",
-      "target": "sweep_plan_chunkinto",
-      "confidence_score": 1.0
+      "target": "sweep_plan_chunkinto"
     },
     {
       "relation": "calls",
@@ -1143,9 +1330,9 @@
       "source_location": "L227",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_validatedestination",
-      "target": "sweep_plan_mxfromhex",
-      "confidence_score": 1.0
+      "target": "sweep_plan_mxfromhex"
     },
     {
       "relation": "calls",
@@ -1155,9 +1342,9 @@
       "source_location": "L253",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_validatepasteddestination",
-      "target": "sweep_plan_mxfromhex",
-      "confidence_score": 1.0
+      "target": "sweep_plan_mxfromhex"
     },
     {
       "relation": "imports_from",
@@ -1167,9 +1354,9 @@
       "source_location": "L85",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_test",
-      "target": "derive",
-      "confidence_score": 1.0
+      "target": "derive"
     },
     {
       "relation": "contains",
@@ -1178,9 +1365,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_test",
-      "target": "sweep_plan_test_coin",
-      "confidence_score": 1.0
+      "target": "sweep_plan_test_coin"
     },
     {
       "relation": "contains",
@@ -1189,9 +1376,9 @@
       "source_location": "L125",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_test",
-      "target": "sweep_plan_test_fatcoin",
-      "confidence_score": 1.0
+      "target": "sweep_plan_test_fatcoin"
     },
     {
       "relation": "contains",
@@ -1200,9 +1387,9 @@
       "source_location": "L164",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_test",
-      "target": "sweep_plan_test_harness",
-      "confidence_score": 1.0
+      "target": "sweep_plan_test_harness"
     },
     {
       "relation": "calls",
@@ -1212,9 +1399,9 @@
       "source_location": "L126",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "sweep_plan_test_fatcoin",
-      "target": "sweep_plan_test_coin",
-      "confidence_score": 1.0
+      "target": "sweep_plan_test_coin"
     },
     {
       "relation": "contains",
@@ -2268,5 +2455,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "c8d6e0b455bb7a7c54690909ac146e51166bbaac"
+  "built_at_commit": "f81fe75725427e967d4a2493e77ae6449d8d0722"
 }

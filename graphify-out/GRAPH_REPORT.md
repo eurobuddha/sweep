@@ -1,16 +1,16 @@
 # Graph Report - sweep  (2026-10-20)
 
 ## Corpus Check
-- 8 files · ~15,844 words
+- 8 files · ~16,178 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 67 nodes · 127 edges · 9 communities (7 shown, 2 thin omitted)
+- 76 nodes · 135 edges · 10 communities (8 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c8d6e0b4`
+- Built from commit: `f81fe757`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -22,18 +22,19 @@
 - treeKeyPublicKey
 - addressFromPublicKey
 - sweep-plan.test.js
+- Sweep — sweep everything on this node to one validated Mx address
 
 ## God Nodes (most connected - your core abstractions)
-1. `plan()` - 8 edges
-2. `treeKeyPublicKey()` - 8 edges
-3. `addressFromPublicKey()` - 8 edges
-4. `hashConcat()` - 7 edges
-5. `Keccak()` - 7 edges
-6. `SHA3()` - 6 edges
-7. `serMiniData()` - 6 edges
-8. `serMiniNumber()` - 6 edges
-9. `decAdd()` - 5 edges
-10. `mmrLeaf()` - 5 edges
+1. `Sweep — sweep everything on this node to one validated Mx address` - 8 edges
+2. `plan()` - 8 edges
+3. `treeKeyPublicKey()` - 8 edges
+4. `addressFromPublicKey()` - 8 edges
+5. `hashConcat()` - 7 edges
+6. `Keccak()` - 7 edges
+7. `SHA3()` - 6 edges
+8. `serMiniData()` - 6 edges
+9. `serMiniNumber()` - 6 edges
+10. `decAdd()` - 5 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `hashConcat()` --calls--> `SHA3()`  [EXTRACTED]
@@ -46,7 +47,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (9 total, 2 thin omitted)
+## Communities (10 total, 2 thin omitted)
 
 ### Community 0 - "sweep-plan.js"
 Cohesion: 0.25
@@ -68,11 +69,17 @@ Nodes (7): hashConcat(), mmrLeaf(), mmrParent(), mmrPerfectRoot(), serMiniData()
 Cohesion: 0.50
 Nodes (5): addressFromPublicKey(), deriveAddress(), modifierBytes(), privateSeed(), toHexUpper()
 
+### Community 9 - "Sweep — sweep everything on this node to one validated Mx address"
+Cohesion: 0.22
+Nodes (8): Advanced path — migrate to block-as-keyuses, Files, Install, Package, Simple path (default), Sweep — sweep everything on this node to one validated Mx address, The sweep engine (both paths), Validation log
+
 ## Knowledge Gaps
+- **7 isolated node(s):** `Simple path (default)`, `Advanced path — migrate to block-as-keyuses`, `The sweep engine (both paths)`, `Install`, `Files` (+2 more)
+  These have ≤1 connection - possible missing edges or undocumented components.
 - **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `addressFromPublicKey()` connect `addressFromPublicKey` to `derive.js`, `treeKeyPublicKey`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **What connects `Simple path (default)`, `Advanced path — migrate to block-as-keyuses`, `The sweep engine (both paths)` to the rest of the system?**
+  _7 weakly-connected nodes found - possible documentation gaps or missing edges._

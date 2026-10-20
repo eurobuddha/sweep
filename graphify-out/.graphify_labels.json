@@ -7,5 +7,6 @@
   "5": "addressFromPublicKey",
   "6": "derive.worker.js",
   "7": "wordlist.js",
-  "8": "sweep-plan.test.js"
+  "8": "sweep-plan.test.js",
+  "9": "Sweep — sweep everything on this node to one validated Mx address"
 }
