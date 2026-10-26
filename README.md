@@ -71,6 +71,22 @@ mds action:install file:sweep-0.2.0.mds.zip trust:write
 WRITE trust is required (transaction commands; the advanced path also reads the vault).
 With READ the dapp validates addresses and derives from a typed phrase but cannot sweep.
 
+## Published release
+
+Sweep **0.2.0** is available from these stores (verified 2026-10-26):
+
+- [Minima MiniDapp directory](https://minidapps.minima.global/) — search for Sweep.
+- MDS Dapp Store feed: <https://minidapps.minima.global/data/dapps.json>.
+- minimaCore/minimaDesk store feed: <https://eurobuddha.com/store/minimadapps.json>.
+- PandaDapps: <https://eurobuddha.com/pandadapps.json>, mirrored at <https://store.eurobuddha.com/pandadapps.json>.
+- IPFS: <https://ipfs.eurobuddha.com/> (both MiniDapp catalogues include Sweep).
+- [GitHub release and download](https://github.com/eurobuddha/sweep/releases/tag/v0.2.0).
+
+All downloads contain the unchanged 41,381-byte `sweep-0.2.0.mds.zip`, SHA-256
+`1fc1611b88a9b5c375d7696e46ccd706bfc76903b07bf09a41b0ce54daf52481`.
+The planner tests and published package checks passed; this publication did not
+perform a wallet transaction or extend the end-to-end sweep validation noted below.
+
 ## Files
 
 - `index.html` — the whole app (UI + validation/verification gates + sweep engine).
